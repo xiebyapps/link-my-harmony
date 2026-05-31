@@ -1,7 +1,9 @@
 import Want from '@ohos.app.ability.Want';
+import hilog from '@ohos.hilog';
 import { normalizeUrl } from './UrlParser';
 
-const SHARE_LOG_TAG: string = 'ShareIntent';
+const DOMAIN = 0x0001;
+const TAG = 'ShareIntent';
 
 let pendingSharedUrl: string = '';
 let pendingSharedTitle: string = '';
@@ -140,19 +142,19 @@ function extractTitleFromUnknownValue(value: Object | undefined): string {
 
 export function extractSharedUrlFromWant(want: Want | undefined): string {
   if (!want) {
-    console.info(`${SHARE_LOG_TAG}: want is empty`);
+    hilog.info(DOMAIN, TAG, "want is empty");
     return '';
   }
 
   const normalizedUri = normalizeSharedUrl(want.uri ?? '', true);
   if (normalizedUri.length > 0) {
-    console.info(`${SHARE_LOG_TAG}: matched want.uri -> ${normalizedUri}`);
+    hilog.info(DOMAIN, TAG, "matched want.uri -> %{public}s", normalizedUri);
     return normalizedUri;
   }
 
   const parameters = want.parameters;
   const parameterKeys = parameters ? Object.keys(parameters) : [];
-  console.info(`${SHARE_LOG_TAG}: action=${want.action ?? ''}, uri=${want.uri ?? ''}, parameterKeys=${JSON.stringify(parameterKeys)}`);
+  hilog.info(DOMAIN, TAG, "action=%{public}s uri=%{public}s", want.action ?? "", want.uri ?? "");
   const candidates: Array<string> = [
     'ohos.extra.param.key.shareUrl',
     'ohos.extra.param.key.shareAbstract',
@@ -173,7 +175,7 @@ export function extractSharedUrlFromWant(want: Want | undefined): string {
     const allowHostFallback = key === 'text' || key === 'content' || key === 'android.intent.extra.TEXT';
     const normalized = extractUrlFromUnknownValue(parameters?.[key], allowHostFallback);
     if (normalized.length > 0) {
-      console.info(`${SHARE_LOG_TAG}: matched candidate key=${key} -> ${normalized}`);
+      hilog.info(DOMAIN, TAG, "matched candidate key=%{public}s", key);
       return normalized;
     }
   }
@@ -184,13 +186,13 @@ export function extractSharedUrlFromWant(want: Want | undefined): string {
       const key = keys[i];
       const normalized = extractUrlFromUnknownValue(parameters[key]);
       if (normalized.length > 0) {
-        console.info(`${SHARE_LOG_TAG}: matched fallback key=${key} -> ${normalized}`);
+        hilog.info(DOMAIN, TAG, "matched fallback key=%{public}s", key);
         return normalized;
       }
     }
   }
 
-  console.info(`${SHARE_LOG_TAG}: no url extracted from want`);
+  hilog.info(DOMAIN, TAG, "no url extracted from want");
   return '';
 }
 
@@ -213,7 +215,7 @@ export function extractSharedTitleFromWant(want: Want | undefined): string {
     const key = candidates[i];
     const title = extractTitleFromUnknownValue(parameters?.[key]);
     if (title.length > 0) {
-      console.info(`${SHARE_LOG_TAG}: matched title key=${key} -> ${title}`);
+      hilog.info(DOMAIN, TAG, "matched title key=%{public}s", key);
       return title;
     }
   }
@@ -227,9 +229,9 @@ export function captureSharedUrlFromWant(want: Want | undefined): string {
   if (url.length > 0) {
     pendingSharedUrl = url;
     pendingSharedTitle = title;
-    console.info(`${SHARE_LOG_TAG}: captured pending url=${url}, title=${title}`);
+    hilog.info(DOMAIN, TAG, "captured pending intent");
   } else {
-    console.info(`${SHARE_LOG_TAG}: capture skipped, empty url`);
+    hilog.info(DOMAIN, TAG, "capture skipped, empty url");
   }
 
   return url;
@@ -243,7 +245,7 @@ export function consumePendingSharedIntent(): PendingSharedIntent {
   pendingSharedUrl = '';
   pendingSharedTitle = '';
   if (payload.url.length > 0) {
-    console.info(`${SHARE_LOG_TAG}: consumed pending intent url=${payload.url}, title=${payload.title}`);
+    hilog.info(DOMAIN, TAG, "consumed pending intent");
   }
   return payload;
 }

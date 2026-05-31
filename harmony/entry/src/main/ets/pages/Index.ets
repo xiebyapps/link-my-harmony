@@ -1,4 +1,5 @@
 import type common from '@ohos.app.ability.common';
+import hilog from '@ohos.hilog';
 import pasteboard from '@ohos.pasteboard';
 import picker from '@ohos.file.picker';
 import { emptyLinkItem, type LinkItem, type CollectionItem, type LinkTag } from '../common/Models';
@@ -54,6 +55,9 @@ import { EditLinkOverlayComponent, type EditLinkOverlayCallbacks } from '../comp
 import { AddLinkOverlayComponent, type AddLinkOverlayCallbacks } from '../components/AddLinkOverlayComponent';
 import { ElementsPanelComponent, type ElementsPanelCallbacks } from '../components/ElementsPanelComponent';
 import { CollectionOverlayComponent, type CollectionOverlayCallbacks, CollectionPickerOverlayComponent, type CollectionPickerOverlayCallbacks } from '../components/CollectionModalsComponent';
+
+const DOMAIN = 0x0001;
+const TAG = 'Folio';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
@@ -181,7 +185,7 @@ struct Index {
   private searchDebounceTimer: number = -1;
 
   aboutToAppear(): void {
-    console.info('Index aboutToAppear');
+    hilog.info(DOMAIN, TAG, 'aboutToAppear');
     if (this.hasRestoredSession) {
       this.startSharePolling();
       return;
@@ -199,7 +203,7 @@ struct Index {
     if (this.sharePollTimer >= 0) {
       clearInterval(this.sharePollTimer);
       this.sharePollTimer = -1;
-      console.info('Index share poll stopped');
+      hilog.info(DOMAIN, TAG, 'share poll stopped');
     }
 
     if (this.noticeTimer >= 0) {
@@ -214,7 +218,7 @@ struct Index {
   }
 
   onPageShow(): void {
-    console.info(`Index onPageShow restoring=${this.restoring}`);
+    hilog.info(DOMAIN, TAG, 'onPageShow restoring=%{public}s', String(this.restoring));
     if (this.restoring) {
       return;
     }
@@ -414,7 +418,7 @@ struct Index {
           onThemeChange: (mode: ThemeMode) => {
             this.themeMode = mode;
             this.persistSessionState().catch((e: Object) => {
-              console.warn('Theme persist failed: ' + String(e));
+              hilog.warn(DOMAIN, TAG, 'Theme persist failed: %{public}s', String(e));
             });
           },
         },
@@ -1175,7 +1179,7 @@ struct Index {
     try {
       await this.usageStorage.save(this.collectionUsage);
     } catch (error) {
-      console.warn(`persist collection usage failed: ${this.formatError(error)}`);
+      hilog.warn(DOMAIN, TAG, "persist collection usage failed: %{public}s", this.formatError(error));
     }
   }
 
@@ -1233,7 +1237,7 @@ struct Index {
     try {
       await this.hostMemoryStorage.save(this.hostMemory);
     } catch (error) {
-      console.warn(`persist host memory failed: ${this.formatError(error)}`);
+      hilog.warn(DOMAIN, TAG, "persist host memory failed: %{public}s", this.formatError(error));
     }
   }
 
@@ -1631,7 +1635,7 @@ struct Index {
       onThemeChange: (mode: ThemeMode) => {
         this.themeMode = mode;
         this.persistSessionState().catch((e: Object) => {
-          console.warn('Theme persist failed: ' + String(e));
+          hilog.warn(DOMAIN, TAG, 'Theme persist failed: %{public}s', String(e));
         });
       },
     };
@@ -1966,7 +1970,7 @@ struct Index {
         false,
       );
     } catch (error) {
-      console.warn(`maybeOfferLocalSync: ${this.formatError(error)}`);
+      hilog.warn(DOMAIN, TAG, "maybeOfferLocalSync: %{public}s", this.formatError(error));
     }
   }
 
@@ -1978,7 +1982,7 @@ struct Index {
       this.localCollectionCount = cols.length;
     } catch (error) {
       // Swallow — counts are best-effort UI helpers, not critical.
-      console.warn(`refreshLocalCounts: ${this.formatError(error)}`);
+      hilog.warn(DOMAIN, TAG, "refreshLocalCounts: %{public}s", this.formatError(error));
     }
   }
 
@@ -2710,7 +2714,7 @@ struct Index {
     try {
       return await this.service.fetchTags();
     } catch (error) {
-      console.info(`Index fetchTags failed: ${this.formatError(error)}`);
+      hilog.info(DOMAIN, TAG, 'fetchTags failed: %{public}s', this.formatError(error));
       return [];
     }
   }
@@ -2719,7 +2723,7 @@ struct Index {
     try {
       return await this.service.fetchDashboardTotals();
     } catch (error) {
-      console.info(`Index fetchDashboardTotals failed: ${this.formatError(error)}`);
+      hilog.info(DOMAIN, TAG, 'fetchDashboardTotals failed: %{public}s', this.formatError(error));
       return null;
     }
   }
@@ -2817,7 +2821,7 @@ struct Index {
         this.setNotice(`Share polling failed: ${this.formatError(error)}`, true);
       });
     }, 1200);
-    console.info('Index share poll started');
+    hilog.info(DOMAIN, TAG, 'share poll started');
   }
 
   private async consumeSharedUrlAndMaybeSave(): Promise<void> {
@@ -2827,12 +2831,12 @@ struct Index {
     if (sharedUrl.length === 0) {
       return;
     }
-    console.info(`Index consumeSharedUrlAndMaybeSave got sharedUrl=${sharedUrl}, sharedTitle=${sharedTitle}`);
+    hilog.info(DOMAIN, TAG, 'consumeSharedUrlAndMaybeSave: got sharedUrl');
 
     this.applyNewLinkDraft(sharedUrl, sharedTitle);
 
     if (this.token.length === 0 && this.sessionMode !== 'offline') {
-      console.info('Index shared url captured but no token and not offline');
+      hilog.info(DOMAIN, TAG, 'shared url captured but no token and not offline');
       this.setNotice('Shared URL captured. Sign in or tap "Use offline" to save it.', false);
       return;
     }

@@ -6,6 +6,7 @@
  *
  * Each only differed in the storage key and the serialize/parse functions.
  */
+import hilog from '@ohos.hilog';
 import { preferences } from '@kit.ArkData';
 
 const PREFERENCES_NAME: string = 'linkwarden.preferences';
@@ -41,7 +42,7 @@ export class PreferencesStore<T> {
         return this.parse(raw);
       }
     } catch (error) {
-      console.warn(`PreferencesStore load failed for key=${this.key}: ${error}`);
+      hilog.warn(0x0001, 'PreferencesStore', 'load failed for key=%{public}s: %{public}s', this.key, String(error));
     }
     return this.parse('');
   }
