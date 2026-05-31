@@ -1656,6 +1656,14 @@ struct Index {
     this.service.setToken(this.token);
     this.service.setMode(this.sessionMode);
     this.settingsInstance = this.instance;
+
+    this.service.onlineClient().onUnauthorized = () => {
+      this.token = '';
+      this.sessionMode = 'offline';
+      this.service.setMode('offline');
+      this.persistSessionState();
+      this.setNotice('Session expired. Switched to offline mode.', true);
+    };
   }
 
   onBackPress(): boolean {

@@ -140,6 +140,7 @@ interface UpdateLinkRequest {
 export class LinkwardenApi {
   private instance: string;
   private token: string;
+  onUnauthorized: (() => void) | null = null;
 
   constructor(instance: string, token: string = '') {
     this.instance = normalizeInstanceUrl(instance);
@@ -449,6 +450,9 @@ export class LinkwardenApi {
         const resultText = typeof data.result === 'string' ? data.result : JSON.stringify(data.result ?? {});
 
         if (data.responseCode < 200 || data.responseCode > 299) {
+          if (data.responseCode === 401 && this.onUnauthorized !== null) {
+            this.onUnauthorized();
+          }
           reject(new Error(`HTTP_${data.responseCode}:${resultText}`));
           return;
         }
