@@ -50,6 +50,7 @@ import { SettingsPanelComponent, type SettingsPanelCallbacks } from '../componen
 import { ThemePickerComponent } from '../components/ThemePickerComponent';
 import { DashboardPanelComponent, type DashboardPanelCallbacks, type CollectionPreviewSection } from '../components/DashboardPanelComponent';
 import { SearchPanelComponent, type SearchPanelCallbacks } from '../components/SearchPanelComponent';
+import { EditLinkOverlayComponent, type EditLinkOverlayCallbacks } from '../components/EditLinkOverlayComponent';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
@@ -295,7 +296,27 @@ struct Index {
       }
 
       if (this.activeModal === 'edit') {
-        this.EditLinkOverlay();
+        EditLinkOverlayComponent({
+          visible: this.activeModal === 'edit',
+          selectedLink: this.selectedLink,
+          detailLoading: this.detailLoading,
+          detailSaving: this.detailSaving,
+          detailDeleting: this.detailDeleting,
+          detailFailedLinkId: this.detailFailedLinkId,
+          editName: this.editName,
+          editUrl: this.editUrl,
+          editDescription: this.editDescription,
+          editPinned: this.editPinned,
+          editCollectionQuery: this.editCollectionQuery,
+          editTagsInput: this.editTagsInput,
+          editTagPickerQuery: this.editTagPickerQuery,
+          pinSaving: this.pinSaving,
+          collections: this.collections,
+          knownTagNames: this.knownTagNames,
+          themeMode: this.themeMode,
+          deviceDarkMode: this.deviceDarkMode,
+          callbacks: this.editLinkCallbacks(),
+        });
       }
 
       if (this.activeModal === 'collection') {
@@ -1182,105 +1203,6 @@ struct Index {
     .width('100%');
   }
 
-  @Builder
-  private EditTagEditor() {
-    Column({ space: 10 }) {
-      Text($r('app.string.tab_tags'))
-        .fontSize(13)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.secondaryTextColor())
-        .width('100%')
-        .textAlign(TextAlign.Start);
-
-      if (this.parsedEditTags().length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(this.parsedEditTags(), (tag: string) => {
-              this.TagChoiceChip(tag, true, () => {
-                this.handleEditTagToggle(tag);
-              });
-            }, (tag: string) => `edit-sel-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-
-        Row()
-          .width('100%')
-          .height(1)
-          .backgroundColor(this.secondaryTextColor())
-          .opacity(0.12);
-      }
-
-      Row({ space: 10 }) {
-        TextInput({ placeholder: 'Search or create tag…', text: this.editTagPickerQuery })
-          .onChange((value: string) => {
-            this.editTagPickerQuery = value;
-          })
-          .layoutWeight(1)
-          .backgroundColor(this.surfaceColor())
-          .borderRadius(10);
-
-        if (normalizedTagCandidate(this.editTagPickerQuery).length > 0) {
-          Button('＋')
-            .fontSize(18)
-            .width(40)
-            .height(40)
-            .padding(0)
-            .backgroundColor(this.tabActiveColor())
-            .fontColor(this.tabActiveTextColor())
-            .borderRadius(10)
-            .onClick(() => {
-              this.editTagsInput = appendTagToInput(this.editTagsInput, this.editTagPickerQuery);
-              this.editTagPickerQuery = '';
-            });
-        }
-
-        if (this.parsedEditTags().length > 0) {
-          Button('✕')
-            .fontSize(13)
-            .width(34)
-            .height(40)
-            .padding(0)
-            .backgroundColor('transparent')
-            .fontColor(this.dangerColor())
-            .borderRadius(10)
-            .onClick(() => {
-              this.editTagsInput = '';
-              this.editTagPickerQuery = '';
-            });
-        }
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center);
-
-      if (quickTagOptions(this.editTagPickerQuery, this.parsedEditTags(), this.uniqueTags()).length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(quickTagOptions(this.editTagPickerQuery, this.parsedEditTags(), this.uniqueTags()), (tag: string) => {
-              this.TagChoiceChip(
-                tag,
-                this.parsedEditTags().some((s: string) => s.toLowerCase() === tag.toLowerCase()),
-                () => {
-                  this.handleEditTagToggle(tag);
-                }
-              );
-            }, (tag: string) => `edit-opt-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-      }
-    }
-    .padding(16)
-    .backgroundColor(this.cardColor())
-    .borderRadius(16)
-    .width('100%');
-  }
 
   @Builder
   private TagChoiceChip(tag: string, selected: boolean, onClick: () => void) {
@@ -1587,74 +1509,6 @@ struct Index {
   }
 
   @Builder
-  private EditLinkOverlay() {
-    Stack({ alignContent: Alignment.Bottom }) {
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor('#66000000')
-        .onClick(() => {
-          this.closeCurrentModal();
-        });
-
-      Column() {
-        Row()
-          .width(44)
-          .height(4)
-          .borderRadius(999)
-          .backgroundColor(this.secondaryTextColor())
-          .opacity(0.25)
-          .alignSelf(ItemAlign.Center)
-          .margin({ top: 12, bottom: 6 });
-
-        Row() {
-          Text(this.detailLoading ? 'Loading...' : 'Edit Link')
-            .fontSize(20)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(this.primaryTextColor())
-            .layoutWeight(1)
-            .textAlign(TextAlign.Start);
-
-          Button('✕')
-            .fontSize(15)
-            .width(34)
-            .height(34)
-            .backgroundColor(this.cardColor())
-            .fontColor(this.secondaryTextColor())
-            .borderRadius(999)
-            .padding(0)
-            .onClick(() => {
-              this.closeCurrentModal();
-            });
-        }
-        .width('100%')
-        .alignItems(VerticalAlign.Center)
-        .margin({ bottom: 16 });
-
-        Scroll() {
-          Column({ space: 16 }) {
-            this.DetailPanel();
-          }
-          .width('100%')
-          .padding({ bottom: 24 });
-        }
-        .width('100%')
-        .scrollBar(BarState.Off);
-      }
-      .onClick(() => {})
-      .width('100%')
-      .padding({ left: 16, right: 16 })
-      .backgroundColor(this.surfaceColor())
-      .borderRadius({ topLeft: 24, topRight: 24 })
-      .constraintSize({ maxHeight: '92%' })
-      .translate({ y: this.activeModal === 'edit' ? 0 : 200 })
-      .animation({ duration: 200, curve: Curve.FastOutSlowIn });
-    }
-    .width('100%')
-    .height('100%');
-  }
-
-  @Builder
   private CollectionOverlay() {
     Stack({ alignContent: Alignment.Bottom }) {
       Column()
@@ -1907,201 +1761,6 @@ struct Index {
   }
 
 
-  @Builder
-  private DetailPanel() {
-    Column({ space: 16 }) {
-      if (!this.detailLoading && this.selectedLink.id !== 0) {
-        Column({ space: 10 }) {
-          Row({ space: 10 }) {
-            Column({ space: 4 }) {
-              Text(this.selectedLink.collectionName.length > 0 ? this.selectedLink.collectionName : 'Unorganized')
-                .fontSize(13)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(this.selectedLink.collectionColor.length > 0 ? this.selectedLink.collectionColor : this.accentColor())
-                .textAlign(TextAlign.Start);
-
-              if (this.selectedLink.createdAt.length > 0) {
-                Text(`Saved ${this.formatDateLabel(this.selectedLink.createdAt)}`)
-                  .fontSize(12)
-                  .fontColor(this.secondaryTextColor())
-                  .textAlign(TextAlign.Start);
-              }
-            }
-            .layoutWeight(1)
-            .alignItems(HorizontalAlign.Start);
-
-            Button(this.pinSaving ? '…' : (this.editPinned ? '📌 Pinned' : 'Pin'))
-              .fontSize(13)
-              .height(34)
-              .backgroundColor(this.editPinned ? this.tabActiveColor() : this.surfaceColor())
-              .fontColor(this.editPinned ? this.tabActiveTextColor() : this.primaryTextColor())
-              .borderRadius(999)
-              .enabled(!this.pinSaving && !this.detailSaving && !this.detailDeleting)
-              .onClick(() => {
-                this.handleTogglePin();
-              });
-          }
-          .width('100%')
-          .alignItems(VerticalAlign.Center);
-        }
-        .padding(16)
-        .backgroundColor(this.cardColor())
-        .borderRadius(16)
-        .width('100%');
-
-        Column({ space: 12 }) {
-          Text('Link')
-            .fontSize(13)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(this.secondaryTextColor())
-            .width('100%')
-            .textAlign(TextAlign.Start);
-
-          TextInput({ placeholder: 'Title', text: this.editName })
-            .onChange((value: string) => {
-              this.editName = value;
-            })
-            .backgroundColor(this.surfaceColor())
-            .borderRadius(10)
-            .width('100%');
-
-          TextInput({ placeholder: 'URL', text: this.editUrl })
-            .onChange((value: string) => {
-              this.editUrl = value;
-            })
-            .backgroundColor(this.surfaceColor())
-            .borderRadius(10)
-            .width('100%');
-
-          TextInput({ placeholder: 'Description', text: this.editDescription })
-            .onChange((value: string) => {
-              this.editDescription = value;
-            })
-            .height(96)
-            .backgroundColor(this.surfaceColor())
-            .borderRadius(10)
-            .width('100%');
-        }
-        .padding(16)
-        .backgroundColor(this.cardColor())
-        .borderRadius(16)
-        .width('100%');
-
-        Column({ space: 12 }) {
-          Text('Collection')
-            .fontSize(13)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(this.secondaryTextColor())
-            .width('100%')
-            .textAlign(TextAlign.Start);
-
-          this.CollectionPickerTrigger(
-            this.collectionLabelForQuery(this.editCollectionQuery),
-            this.collectionHintForQuery(this.editCollectionQuery),
-            () => {
-              this.openCollectionPicker('edit');
-            }
-          );
-        }
-        .padding(16)
-        .backgroundColor(this.cardColor())
-        .borderRadius(16)
-        .width('100%');
-
-        this.EditTagEditor();
-
-        Button(this.detailSaving ? 'Saving...' : 'Save Changes')
-          .width('100%')
-          .height(50)
-          .fontSize(16)
-          .fontWeight(FontWeight.Medium)
-          .backgroundColor(this.tabActiveColor())
-          .fontColor(this.tabActiveTextColor())
-          .borderRadius(14)
-          .enabled(!this.detailSaving && !this.detailDeleting)
-          .onClick(() => {
-            this.handleSaveLink();
-          });
-
-        Button(this.detailDeleting ? 'Deleting...' : 'Delete Link')
-          .width('100%')
-          .height(44)
-          .fontSize(14)
-          .backgroundColor('transparent')
-          .fontColor(this.dangerColor())
-          .borderRadius(14)
-          .enabled(!this.detailSaving && !this.detailDeleting)
-          .onClick(() => {
-            this.handleDeleteLink();
-          });
-      } else if (!this.detailLoading && this.detailFailedLinkId > 0) {
-        Column({ space: 12 }) {
-          Text('Failed to load link detail.')
-            .fontSize(14)
-            .fontColor(this.dangerColor())
-            .width('100%')
-            .textAlign(TextAlign.Center);
-
-          Row({ space: 12 }) {
-            Button('Retry')
-              .fontSize(14)
-              .height(40)
-              .layoutWeight(1)
-              .backgroundColor(this.tabActiveColor())
-              .fontColor(this.tabActiveTextColor())
-              .borderRadius(10)
-              .onClick(() => {
-                this.handleSelectLink(this.detailFailedLinkId);
-              });
-
-            Button('Close')
-              .fontSize(14)
-              .height(40)
-              .layoutWeight(1)
-              .backgroundColor(this.surfaceColor())
-              .fontColor(this.primaryTextColor())
-              .borderRadius(10)
-              .onClick(() => {
-                this.activeModal = 'none';
-                this.detailFailedLinkId = 0;
-              });
-          }
-          .width('100%');
-        }
-        .padding(16)
-        .width('100%');
-      } else {
-        Column({ space: 12 }) {
-          Row({ space: 8 }) {
-            LoadingProgress()
-              .width(16)
-              .height(16)
-              .color(this.secondaryTextColor());
-            Text('Loading detail...')
-              .fontSize(13)
-              .fontColor(this.secondaryTextColor());
-          }
-          .width('100%');
-
-          Button('Cancel')
-            .fontSize(13)
-            .height(36)
-            .backgroundColor(this.surfaceColor())
-            .fontColor(this.secondaryTextColor())
-            .borderRadius(10)
-            .width('100%')
-            .onClick(() => {
-              this.activeModal = 'none';
-              this.detailLoading = false;
-              this.detailFailedLinkId = 0;
-            });
-        }
-        .padding(16)
-        .width('100%');
-      }
-    }
-    .width('100%');
-  }
 
   @Builder
   private SectionTitle(value: Resource | string) {
@@ -2871,6 +2530,24 @@ struct Index {
 
   private isThemeOptionSelected(mode: ThemeMode): boolean {
     return this.themeMode === mode;
+  }
+
+  private editLinkCallbacks(): EditLinkOverlayCallbacks {
+    return {
+      onClose: () => this.closeCurrentModal(),
+      onSave: () => this.handleSaveLink(),
+      onDelete: () => this.handleDeleteLink(),
+      onRetry: () => this.handleSelectLink(this.detailFailedLinkId),
+      onTogglePin: () => this.handleTogglePin(),
+      onOpenCollectionPicker: () => this.openCollectionPicker('edit'),
+      onEditNameChange: (v: string) => { this.editName = v; },
+      onEditUrlChange: (v: string) => { this.editUrl = v; },
+      onEditDescriptionChange: (v: string) => { this.editDescription = v; },
+      onEditCollectionQueryChange: (v: string) => { this.editCollectionQuery = v; },
+      onEditTagsInputChange: (v: string) => { this.editTagsInput = v; },
+      onEditTagPickerQueryChange: (v: string) => { this.editTagPickerQuery = v; },
+      onEditTagToggle: (tag: string) => this.handleEditTagToggle(tag),
+    };
   }
 
   private searchCallbacks(): SearchPanelCallbacks {
