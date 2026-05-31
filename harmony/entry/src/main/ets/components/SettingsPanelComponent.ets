@@ -102,10 +102,9 @@ export struct SettingsPanelComponent {
             .width('100%')
             .textAlign(TextAlign.Start);
         }
-        .padding(18)
+        .padding(14)
         .backgroundColor(this.palette().card)
-        .borderRadius(18)
-        .border({ width: 1, color: this.palette().border })
+        .borderRadius(14)
         .width('100%');
 
         // Stats
@@ -132,10 +131,9 @@ export struct SettingsPanelComponent {
           }
           .width('100%');
         }
-        .padding(18)
+        .padding(14)
         .backgroundColor(this.palette().card)
-        .borderRadius(18)
-        .border({ width: 1, color: this.palette().border })
+        .borderRadius(14)
         .width('100%');
 
         // Server
@@ -173,10 +171,9 @@ export struct SettingsPanelComponent {
               this.callbacks.onSaveSettings();
             });
         }
-        .padding(18)
+        .padding(14)
         .backgroundColor(this.palette().card)
-        .borderRadius(18)
-        .border({ width: 1, color: this.palette().border })
+        .borderRadius(14)
         .width('100%');
 
         // Local data
@@ -305,10 +302,9 @@ export struct SettingsPanelComponent {
               });
           }
         }
-        .padding(18)
+        .padding(14)
         .backgroundColor(this.palette().card)
-        .borderRadius(18)
-        .border({ width: 1, color: this.palette().border })
+        .borderRadius(14)
         .width('100%');
 
         // Preview
@@ -368,9 +364,9 @@ export struct SettingsPanelComponent {
             }
             .width('100%');
           }
-          .padding(18)
+          .padding(14)
           .backgroundColor(this.palette().card)
-          .borderRadius(18)
+          .borderRadius(14)
           .border({ width: 1, color: this.palette().accent })
           .width('100%');
         }
@@ -446,9 +442,9 @@ export struct SettingsPanelComponent {
               .width('100%');
             }
           }
-          .padding(18)
+          .padding(14)
           .backgroundColor(this.palette().card)
-          .borderRadius(18)
+          .borderRadius(14)
           .border({ width: 1, color: this.palette().border })
           .width('100%');
         }
@@ -475,10 +471,9 @@ export struct SettingsPanelComponent {
           }
           .width('100%');
         }
-        .padding(18)
+        .padding(14)
         .backgroundColor(this.palette().card)
-        .borderRadius(18)
-        .border({ width: 1, color: this.palette().border })
+        .borderRadius(14)
         .width('100%');
 
         // Session
@@ -552,10 +547,9 @@ export struct SettingsPanelComponent {
               });
           }
         }
-        .padding(18)
+        .padding(14)
         .backgroundColor(this.palette().card)
-        .borderRadius(18)
-        .border({ width: 1, color: this.palette().border })
+        .borderRadius(14)
         .width('100%');
 
         Text('HarmonyOS Native Client')

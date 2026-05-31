@@ -44,6 +44,28 @@ export interface DockMetrics {
   padding: number;
 }
 
+// Canonical layout tokens — use these instead of hardcoded values.
+export const LAYOUT = {
+  // Border radius
+  radiusCard: 14,
+  radiusInput: 10,
+  radiusButton: 14,
+  radiusSheet: 24,
+  radiusPill: 999,
+
+  // Card padding
+  paddingCard: 14,
+  paddingForm: 16,
+
+  // Button dimensions
+  buttonHeight: 44,
+  buttonHeightLarge: 50,
+
+  // Content spacing
+  spaceSection: 10,
+  spaceContent: 8,
+} as const;
+
 export interface ThemeOption {
   mode: ThemeMode;
   title: string;
@@ -121,7 +143,7 @@ export function shouldReturnToDashboard(mainView: MainView): boolean {
 export function createThemePalette(themeMode: ThemeMode): ThemePalette {
   if (themeMode === 'dark') {
     return {
-      page: '#000000',
+      page: '#0a0a0a',
       surface: '#0c0c0c',
       card: '#161616',
       cardMuted: '#1c1c1e',

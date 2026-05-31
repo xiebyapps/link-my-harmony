@@ -4,14 +4,8 @@
 import type { CollectionItem } from '../common/Models';
 import type { ThemeMode } from '../common/SessionState';
 import { createThemePalette, type ThemePalette } from '../common/UiDesign';
-import {
-  normalizedTagCandidate,
-  appendTagToInput,
-  toggleTagInInput,
-  parseTagsFromInput,
-  quickTagOptions,
-} from '../common/TagParser';
 import { extractUrlAndTitle } from '../common/UrlParser';
+import { TagEditorComponent, type TagEditorCallbacks } from './TagEditorComponent';
 
 export interface AddLinkOverlayCallbacks {
   onClose: () => void;
@@ -44,14 +38,6 @@ export struct AddLinkOverlayComponent {
     const effectiveMode: ThemeMode =
       (this.themeMode === 'system' && this.deviceDarkMode) ? 'dark' : this.themeMode;
     return createThemePalette(effectiveMode);
-  }
-
-  private parsedTags(): Array<string> {
-    return parseTagsFromInput(this.newLinkTagsInput);
-  }
-
-  private tagOptions(): Array<string> {
-    return quickTagOptions(this.newTagPickerQuery, this.parsedTags(), this.knownTagNames);
   }
 
   private hasResolvedUrl(): boolean {
@@ -180,7 +166,7 @@ export struct AddLinkOverlayComponent {
             }
             .padding(16)
             .backgroundColor(this.palette().card)
-            .borderRadius(16)
+            .borderRadius(14)
             .width('100%');
 
             // Collection
@@ -228,21 +214,32 @@ export struct AddLinkOverlayComponent {
             }
             .padding(16)
             .backgroundColor(this.palette().card)
-            .borderRadius(16)
+            .borderRadius(14)
             .width('100%');
 
             // Tag editor
-            this.TagEditor();
+            TagEditorComponent({
+              tagsInput: this.newLinkTagsInput,
+              tagPickerQuery: this.newTagPickerQuery,
+              knownTagNames: this.knownTagNames,
+              themeMode: this.themeMode,
+              deviceDarkMode: this.deviceDarkMode,
+              callbacks: {
+                onTagsInputChange: (v: string) => { this.newLinkTagsInput = v; },
+                onTagPickerQueryChange: (v: string) => { this.newTagPickerQuery = v; },
+                onTagToggle: (tag: string) => this.callbacks.onTagToggle(tag),
+              },
+            });
 
             // Add button
             Button(this.loading ? 'Adding...' : 'Add Link')
               .width('100%')
-              .height(52)
+              .height(50)
               .fontSize(16)
               .fontWeight(FontWeight.Medium)
               .backgroundColor(this.palette().accentStrong)
               .fontColor(this.palette().accentText)
-              .borderRadius(16)
+              .borderRadius(14)
               .border({ width: 1, color: this.palette().accent })
               .shadow({ radius: 14, color: this.palette().dockShadow, offsetX: 0, offsetY: 8 })
               .enabled(!this.loading)
@@ -267,118 +264,5 @@ export struct AddLinkOverlayComponent {
     }
     .width('100%')
     .height('100%');
-  }
-
-  @Builder
-  private TagEditor() {
-    Column({ space: 10 }) {
-      Text('Tags')
-        .fontSize(13)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.palette().textSecondary)
-        .width('100%')
-        .textAlign(TextAlign.Start);
-
-      if (this.parsedTags().length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(this.parsedTags(), (tag: string) => {
-              Button(tag)
-                .fontSize(12)
-                .height(30)
-                .backgroundColor(this.palette().accentSoft)
-                .fontColor(this.palette().accent)
-                .borderRadius(999)
-                .onClick(() => {
-                  this.callbacks.onTagToggle(tag);
-                });
-            }, (tag: string) => `draft-sel-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-
-        Row()
-          .width('100%')
-          .height(1)
-          .backgroundColor(this.palette().textSecondary)
-          .opacity(0.12);
-      }
-
-      Row({ space: 10 }) {
-        TextInput({ placeholder: 'Search or create tag…', text: this.newTagPickerQuery })
-          .onChange((value: string) => {
-            this.callbacks.onTagPickerQueryChange(value);
-          })
-          .layoutWeight(1)
-          .backgroundColor(this.palette().surface)
-          .fontColor(this.palette().textPrimary)
-          .borderRadius(10);
-
-        if (normalizedTagCandidate(this.newTagPickerQuery).length > 0) {
-          Button('＋')
-            .fontSize(18)
-            .width(40)
-            .height(40)
-            .padding(0)
-            .backgroundColor(this.palette().accentStrong)
-            .fontColor(this.palette().accentText)
-            .borderRadius(10)
-            .onClick(() => {
-              this.callbacks.onTagsInputChange(
-                appendTagToInput(this.newLinkTagsInput, this.newTagPickerQuery)
-              );
-              this.callbacks.onTagPickerQueryChange('');
-            });
-        }
-
-        if (this.parsedTags().length > 0) {
-          Button('✕')
-            .fontSize(13)
-            .width(34)
-            .height(40)
-            .padding(0)
-            .backgroundColor('transparent')
-            .fontColor(this.palette().danger)
-            .borderRadius(10)
-            .onClick(() => {
-              this.callbacks.onTagsInputChange('');
-              this.callbacks.onTagPickerQueryChange('');
-            });
-        }
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center);
-
-      if (this.tagOptions().length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(this.tagOptions(), (tag: string) => {
-              Button(tag)
-                .fontSize(12)
-                .height(30)
-                .backgroundColor(this.parsedTags().some((s: string) => s.toLowerCase() === tag.toLowerCase())
-                  ? this.palette().accentSoft : this.palette().input)
-                .fontColor(this.parsedTags().some((s: string) => s.toLowerCase() === tag.toLowerCase())
-                  ? this.palette().accent : this.palette().textPrimary)
-                .borderRadius(999)
-                .onClick(() => {
-                  this.callbacks.onTagToggle(tag);
-                });
-            }, (tag: string) => `draft-opt-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-      }
-    }
-    .padding(16)
-    .backgroundColor(this.palette().card)
-    .borderRadius(16)
-    .width('100%');
   }
 }

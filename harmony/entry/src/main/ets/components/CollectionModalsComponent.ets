@@ -163,7 +163,7 @@ export struct CollectionOverlayComponent {
       .width('100%')
       .padding(12)
       .backgroundColor(this.palette().surface)
-      .borderRadius({ topLeft: 20, topRight: 20 })
+      .borderRadius({ topLeft: 24, topRight: 24 })
       .constraintSize({ maxHeight: '80%' });
     }
     .width('100%')
@@ -348,7 +348,7 @@ export struct CollectionPickerOverlayComponent {
       .width('100%')
       .padding(12)
       .backgroundColor(this.palette().surface)
-      .borderRadius({ topLeft: 20, topRight: 20 })
+      .borderRadius({ topLeft: 24, topRight: 24 })
       .constraintSize({ maxHeight: '85%' });
     }
     .width('100%')

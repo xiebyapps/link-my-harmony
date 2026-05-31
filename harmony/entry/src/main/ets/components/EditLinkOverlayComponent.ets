@@ -4,14 +4,7 @@
 import type { LinkItem, CollectionItem, LinkTag } from '../common/Models';
 import type { ThemeMode } from '../common/SessionState';
 import { createThemePalette, type ThemePalette } from '../common/UiDesign';
-import {
-  parseTagsFromInput,
-  normalizedTagCandidate,
-  appendTagToInput,
-  toggleTagInInput,
-  tagsIncludingPendingQuery,
-  quickTagOptions,
-} from '../common/TagParser';
+import { TagEditorComponent, type TagEditorCallbacks } from './TagEditorComponent';
 
 export interface EditLinkOverlayCallbacks {
   onClose: () => void;
@@ -55,14 +48,6 @@ export struct EditLinkOverlayComponent {
     const effectiveMode: ThemeMode =
       (this.themeMode === 'system' && this.deviceDarkMode) ? 'dark' : this.themeMode;
     return createThemePalette(effectiveMode);
-  }
-
-  private parsedEditTags(): Array<string> {
-    return parseTagsFromInput(this.editTagsInput);
-  }
-
-  private editTagOptions(): Array<string> {
-    return quickTagOptions(this.editTagPickerQuery, this.parsedEditTags(), this.knownTagNames);
   }
 
   private collectionLabel(): string {
@@ -208,7 +193,7 @@ export struct EditLinkOverlayComponent {
         }
         .padding(16)
         .backgroundColor(this.palette().card)
-        .borderRadius(16)
+        .borderRadius(14)
         .width('100%');
 
         // Link fields
@@ -247,7 +232,7 @@ export struct EditLinkOverlayComponent {
         }
         .padding(16)
         .backgroundColor(this.palette().card)
-        .borderRadius(16)
+        .borderRadius(14)
         .width('100%');
 
         // Collection picker
@@ -295,11 +280,22 @@ export struct EditLinkOverlayComponent {
         }
         .padding(16)
         .backgroundColor(this.palette().card)
-        .borderRadius(16)
+        .borderRadius(14)
         .width('100%');
 
         // Tag editor
-        this.TagEditor();
+        TagEditorComponent({
+          tagsInput: this.editTagsInput,
+          tagPickerQuery: this.editTagPickerQuery,
+          knownTagNames: this.knownTagNames,
+          themeMode: this.themeMode,
+          deviceDarkMode: this.deviceDarkMode,
+          callbacks: {
+            onTagsInputChange: (v: string) => { this.editTagsInput = v; },
+            onTagPickerQueryChange: (v: string) => { this.editTagPickerQuery = v; },
+            onTagToggle: (tag: string) => this.callbacks.onEditTagToggle(tag),
+          },
+        });
 
         // Save button
         Button(this.detailSaving ? 'Saving...' : 'Save Changes')
@@ -388,123 +384,10 @@ export struct EditLinkOverlayComponent {
               this.callbacks.onClose();
             });
         }
-        .padding(16)
+        .padding(14)
         .width('100%');
       }
     }
-    .width('100%');
-  }
-
-  @Builder
-  private TagEditor() {
-    Column({ space: 10 }) {
-      Text('Tags')
-        .fontSize(13)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.palette().textSecondary)
-        .width('100%')
-        .textAlign(TextAlign.Start);
-
-      if (this.parsedEditTags().length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(this.parsedEditTags(), (tag: string) => {
-              Button(tag)
-                .fontSize(12)
-                .height(30)
-                .backgroundColor(this.palette().accentSoft)
-                .fontColor(this.palette().accent)
-                .borderRadius(999)
-                .onClick(() => {
-                  this.callbacks.onEditTagToggle(tag);
-                });
-            }, (tag: string) => `edit-sel-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-
-        Row()
-          .width('100%')
-          .height(1)
-          .backgroundColor(this.palette().textSecondary)
-          .opacity(0.12);
-      }
-
-      Row({ space: 10 }) {
-        TextInput({ placeholder: 'Search or create tag…', text: this.editTagPickerQuery })
-          .onChange((value: string) => {
-            this.callbacks.onEditTagPickerQueryChange(value);
-          })
-          .layoutWeight(1)
-          .backgroundColor(this.palette().surface)
-          .fontColor(this.palette().textPrimary)
-          .borderRadius(10);
-
-        if (normalizedTagCandidate(this.editTagPickerQuery).length > 0) {
-          Button('＋')
-            .fontSize(18)
-            .width(40)
-            .height(40)
-            .padding(0)
-            .backgroundColor(this.palette().accentStrong)
-            .fontColor(this.palette().accentText)
-            .borderRadius(10)
-            .onClick(() => {
-              this.callbacks.onEditTagsInputChange(
-                appendTagToInput(this.editTagsInput, this.editTagPickerQuery)
-              );
-              this.callbacks.onEditTagPickerQueryChange('');
-            });
-        }
-
-        if (this.parsedEditTags().length > 0) {
-          Button('✕')
-            .fontSize(13)
-            .width(34)
-            .height(40)
-            .padding(0)
-            .backgroundColor('transparent')
-            .fontColor(this.palette().danger)
-            .borderRadius(10)
-            .onClick(() => {
-              this.callbacks.onEditTagsInputChange('');
-              this.callbacks.onEditTagPickerQueryChange('');
-            });
-        }
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center);
-
-      if (this.editTagOptions().length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(this.editTagOptions(), (tag: string) => {
-              Button(tag)
-                .fontSize(12)
-                .height(30)
-                .backgroundColor(this.parsedEditTags().some((s: string) => s.toLowerCase() === tag.toLowerCase())
-                  ? this.palette().accentSoft : this.palette().input)
-                .fontColor(this.parsedEditTags().some((s: string) => s.toLowerCase() === tag.toLowerCase())
-                  ? this.palette().accent : this.palette().textPrimary)
-                .borderRadius(999)
-                .onClick(() => {
-                  this.callbacks.onEditTagToggle(tag);
-                });
-            }, (tag: string) => `edit-opt-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-      }
-    }
-    .padding(16)
-    .backgroundColor(this.palette().card)
-    .borderRadius(16)
     .width('100%');
   }
 }
