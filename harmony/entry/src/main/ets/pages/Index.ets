@@ -1635,6 +1635,8 @@ struct Index {
           hilog.warn(DOMAIN, TAG, 'Theme persist failed: %{public}s', String(e));
         });
       },
+      onDebugAddTestBookmarks: () => this.handleDebugAddTestBookmarks(),
+      onDebugRemoveTestBookmarks: () => this.handleDebugRemoveTestBookmarks(),
     };
   }
 
@@ -2842,5 +2844,127 @@ struct Index {
         : 'Shared URL captured. You can set collection and tags before saving.',
       false,
     );
+  }
+
+  // --- Debug tools -----------------------------------------------------------
+
+  private async handleDebugAddTestBookmarks(): Promise<void> {
+    if (this.sessionMode !== 'offline') {
+      this.setNotice('Switch to offline mode first to add test data locally.', true);
+      return;
+    }
+
+    this.loading = true;
+    this.setNotice('Adding test bookmarks...', false);
+
+    try {
+      const collections = [
+        'Development', 'Design', 'News', 'Reading List', 'Shopping',
+        'Travel', 'Recipes', 'Music', 'Gaming', 'Finance',
+      ];
+      const tags = [
+        'javascript', 'typescript', 'react', 'vue', 'python', 'rust', 'go',
+        'figma', 'sketch', 'css', 'html', 'node', 'docker', 'kubernetes',
+        'ai', 'machine-learning', 'crypto', 'stocks', 'cooking', 'travel',
+        'photography', 'music', 'gaming', 'fitness', 'health', 'science',
+      ];
+
+      const urls = [
+        'https://developer.mozilla.org', 'https://react.dev', 'https://vuejs.org',
+        'https://www.typescriptlang.org', 'https://tailwindcss.com', 'https://vitejs.dev',
+        'https://nextjs.org', 'https://svelte.dev', 'https://astro.build',
+        'https://news.ycombinator.com', 'https://reddit.com', 'https://lobste.rs',
+        'https://github.com/trending', 'https://dev.to', 'https://medium.com',
+        'https://stackoverflow.com', 'https://npmjs.com', 'https://pypi.org',
+        'https://crates.io', 'https://docs.docker.com', 'https://kubernetes.io',
+        'https://figma.com', 'https://dribbble.com', 'https://behance.net',
+        'https://unsplash.com', 'https://pexels.com', 'https://canva.com',
+        'https://notion.so', 'https://obsidian.md', 'https://linear.app',
+        'https://vercel.com', 'https://netlify.com', 'https://railway.app',
+      ];
+
+      const titles = [
+        'MDN Web Docs', 'React Documentation', 'Vue.js Guide',
+        'TypeScript Handbook', 'Tailwind CSS', 'Vite',
+        'Next.js Framework', 'Svelte', 'Astro',
+        'Hacker News', 'Reddit', 'Lobsters',
+        'GitHub Trending', 'DEV Community', 'Medium',
+        'Stack Overflow', 'npm Registry', 'PyPI',
+        'crates.io', 'Docker Docs', 'Kubernetes',
+        'Figma', 'Dribbble', 'Behance',
+        'Unsplash', 'Pexels', 'Canva',
+        'Notion', 'Obsidian', 'Linear',
+        'Vercel', 'Netlify', 'Railway',
+      ];
+
+      let added = 0;
+      for (let i = 0; i < urls.length; i++) {
+        const collName = collections[i % collections.length];
+        const tagCount = 2 + (i % 4);
+        const selectedTags: Array<string> = [];
+        for (let t = 0; t < tagCount; t++) {
+          selectedTags.push(tags[(i * 3 + t) % tags.length]);
+        }
+
+        await this.service.addLink(urls[i], titles[i], {
+          tagNames: selectedTags,
+          collection: { id: 0, ownerId: 0, name: collName, description: '', color: '', parentId: 0, parentName: '', linkCount: 0 },
+        });
+        added++;
+      }
+
+      await this.refreshLinks(true);
+      await this.refreshDashboard();
+      await this.refreshLocalCounts();
+      this.setNotice(`Added ${added} test bookmarks.`, false);
+    } catch (error) {
+      this.setNotice(`Failed to add test data: ${this.formatError(error)}`, true);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private async handleDebugRemoveTestBookmarks(): Promise<void> {
+    if (this.sessionMode !== 'offline') {
+      this.setNotice('Switch to offline mode first.', true);
+      return;
+    }
+
+    this.loading = true;
+    this.setNotice('Removing test bookmarks...', false);
+
+    try {
+      const testUrls = [
+        'https://developer.mozilla.org', 'https://react.dev', 'https://vuejs.org',
+        'https://www.typescriptlang.org', 'https://tailwindcss.com', 'https://vitejs.dev',
+        'https://nextjs.org', 'https://svelte.dev', 'https://astro.build',
+        'https://news.ycombinator.com', 'https://reddit.com', 'https://lobste.rs',
+        'https://github.com/trending', 'https://dev.to', 'https://medium.com',
+        'https://stackoverflow.com', 'https://npmjs.com', 'https://pypi.org',
+        'https://crates.io', 'https://docs.docker.com', 'https://kubernetes.io',
+        'https://figma.com', 'https://dribbble.com', 'https://behance.net',
+        'https://unsplash.com', 'https://pexels.com', 'https://canva.com',
+        'https://notion.so', 'https://obsidian.md', 'https://linear.app',
+        'https://vercel.com', 'https://netlify.com', 'https://railway.app',
+      ];
+
+      let removed = 0;
+      const allLinks = await this.service.fetchLinks(0, '', 0, false);
+      for (const link of allLinks.links) {
+        if (testUrls.indexOf(link.url) >= 0) {
+          await this.service.deleteLink(link.id);
+          removed++;
+        }
+      }
+
+      await this.refreshLinks(true);
+      await this.refreshDashboard();
+      await this.refreshLocalCounts();
+      this.setNotice(`Removed ${removed} test bookmarks.`, false);
+    } catch (error) {
+      this.setNotice(`Failed to remove test data: ${this.formatError(error)}`, true);
+    } finally {
+      this.loading = false;
+    }
   }
 }

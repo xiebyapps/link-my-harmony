@@ -24,6 +24,8 @@ export interface SettingsPanelCallbacks {
   onSettingsInstanceChange: (value: string) => void;
   onImportPayloadChange: (value: string) => void;
   onThemeChange: (mode: ThemeMode) => void;
+  onDebugAddTestBookmarks?: () => void;
+  onDebugRemoveTestBookmarks?: () => void;
 }
 
 @Component
@@ -551,6 +553,53 @@ export struct SettingsPanelComponent {
         .backgroundColor(this.palette().card)
         .borderRadius(14)
         .width('100%');
+
+        // Debug tools
+        if (this.callbacks.onDebugAddTestBookmarks !== undefined) {
+          Column({ space: 10 }) {
+            Text('Debug Tools')
+              .fontSize(14)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.palette().danger)
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Text('Add 30 test bookmarks with diverse tags and collections. Remove them with the button below.')
+              .fontSize(12)
+              .fontColor(this.palette().textSecondary)
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Row({ space: 8 }) {
+              Button('Add test data')
+                .layoutWeight(1)
+                .height(40)
+                .backgroundColor(this.palette().accentSoft)
+                .fontColor(this.palette().accent)
+                .borderRadius(10)
+                .onClick(() => {
+                  this.callbacks.onDebugAddTestBookmarks!();
+                });
+
+              Button('Remove test data')
+                .layoutWeight(1)
+                .height(40)
+                .backgroundColor('transparent')
+                .fontColor(this.palette().danger)
+                .borderRadius(10)
+                .border({ width: 1, color: this.palette().danger })
+                .onClick(() => {
+                  this.callbacks.onDebugRemoveTestBookmarks!();
+                });
+            }
+            .width('100%');
+          }
+          .padding(14)
+          .backgroundColor(this.palette().card)
+          .borderRadius(14)
+          .border({ width: 1, color: this.palette().danger })
+          .width('100%');
+        }
 
         Text('HarmonyOS Native Client')
           .fontSize(12)
