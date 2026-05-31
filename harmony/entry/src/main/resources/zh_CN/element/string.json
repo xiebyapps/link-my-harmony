@@ -359,6 +359,398 @@
     {
       "name": "tags_count",
       "value": "%1$d 个标签"
+    },
+    {
+      "name": "label_link_section",
+      "value": "链接"
+    },
+    {
+      "name": "label_collection_section",
+      "value": "收藏夹"
+    },
+    {
+      "name": "label_new_collection",
+      "value": "新建收藏夹"
+    },
+    {
+      "name": "label_selected",
+      "value": "已选"
+    },
+    {
+      "name": "label_untitled",
+      "value": "无标题"
+    },
+    {
+      "name": "label_loading",
+      "value": "加载中..."
+    },
+    {
+      "name": "label_loading_detail",
+      "value": "加载详情中..."
+    },
+    {
+      "name": "label_saved_date",
+      "value": "保存于 %1$s"
+    },
+    {
+      "name": "label_color",
+      "value": "颜色：%1$s"
+    },
+    {
+      "name": "label_parent_collection",
+      "value": "父收藏夹：%1$s"
+    },
+    {
+      "name": "label_version_theme",
+      "value": "v0.1.0 · %1$s主题"
+    },
+    {
+      "name": "label_local_data_summary",
+      "value": "本地存储 %1$d 个链接、%2$d 个收藏夹。请定期备份——数据在应用沙箱中。"
+    },
+    {
+      "name": "label_not_on_server",
+      "value": "%1$d 个书签尚未同步到服务器。"
+    },
+    {
+      "name": "label_import_preview_count",
+      "value": "包含 %1$d 个链接、%2$d 个收藏夹、%3$d 个标签。"
+    },
+    {
+      "name": "label_exported_at",
+      "value": "导出于 %1$s"
+    },
+    {
+      "name": "label_exported_not_recorded",
+      "value": "未记录导出日期。"
+    },
+    {
+      "name": "label_links_count_inline",
+      "value": "%1$d 个链接"
+    },
+    {
+      "name": "label_collections_count_inline",
+      "value": "%1$d 个收藏夹"
+    },
+    {
+      "name": "label_tags_count_inline",
+      "value": "%1$d 个标签"
+    },
+    {
+      "name": "hint_paste_url",
+      "value": "粘贴 URL 或包含 URL 的文本"
+    },
+    {
+      "name": "hint_title_optional",
+      "value": "标题（可选）"
+    },
+    {
+      "name": "hint_tap_to_choose",
+      "value": "点击选择"
+    },
+    {
+      "name": "hint_search_links",
+      "value": "搜索链接"
+    },
+    {
+      "name": "hint_search_collections",
+      "value": "搜索收藏夹"
+    },
+    {
+      "name": "hint_search_tags",
+      "value": "搜索标签"
+    },
+    {
+      "name": "hint_name",
+      "value": "名称"
+    },
+    {
+      "name": "hint_parent_collection_optional",
+      "value": "父收藏夹（可选）"
+    },
+    {
+      "name": "hint_search_or_create_tag",
+      "value": "搜索或创建标签…"
+    },
+    {
+      "name": "msg_no_url_detected",
+      "value": "未检测到 URL"
+    },
+    {
+      "name": "msg_no_parent_found",
+      "value": "未找到匹配的父收藏夹。"
+    },
+    {
+      "name": "msg_search_collections_or_create",
+      "value": "搜索已有收藏夹或新建一个。"
+    },
+    {
+      "name": "msg_no_collections_match",
+      "value": "没有匹配当前搜索的收藏夹。"
+    },
+    {
+      "name": "msg_no_links_yet",
+      "value": "暂无链接。"
+    },
+    {
+      "name": "msg_no_collections",
+      "value": "暂无收藏夹。"
+    },
+    {
+      "name": "msg_no_collections_search",
+      "value": "没有匹配此搜索的收藏夹。"
+    },
+    {
+      "name": "msg_loading_links",
+      "value": "加载链接中…"
+    },
+    {
+      "name": "msg_no_more_links_period",
+      "value": "没有更多链接。"
+    },
+    {
+      "name": "msg_no_pinned_links",
+      "value": "暂无置顶链接。"
+    },
+    {
+      "name": "msg_no_recent_links",
+      "value": "暂无最近链接。"
+    },
+    {
+      "name": "msg_loading_dashboard",
+      "value": "加载仪表盘中…"
+    },
+    {
+      "name": "msg_no_collection_previews",
+      "value": "暂无收藏夹预览。"
+    },
+    {
+      "name": "msg_search_hint_full",
+      "value": "输入关键词搜索链接、收藏夹和标签。"
+    },
+    {
+      "name": "msg_change_server_desc",
+      "value": "更改 Linkwarden 服务器地址。"
+    },
+    {
+      "name": "msg_import_desc",
+      "value": "从文件导入或粘贴 JSON 备份。"
+    },
+    {
+      "name": "msg_strategy_replace",
+      "value": "策略：替换——所有当前本地数据将被清除。"
+    },
+    {
+      "name": "msg_strategy_merge",
+      "value": "策略：合并——保留现有数据，跳过重复项。"
+    },
+    {
+      "name": "msg_not_connected",
+      "value": "未连接。登录以跨设备同步。"
+    },
+    {
+      "name": "msg_signed_in_switch_hint",
+      "value": "已登录。切换到离线模式可在无服务器时工作。"
+    },
+    {
+      "name": "msg_harmonyos_client",
+      "value": "鸿蒙原生客户端"
+    },
+    {
+      "name": "msg_create_here_hint",
+      "value": "在此创建后返回链接表单。"
+    },
+    {
+      "name": "msg_sync_title",
+      "value": "同步本地 → Linkwarden"
+    },
+    {
+      "name": "btn_adding",
+      "value": "添加中…"
+    },
+    {
+      "name": "btn_saving",
+      "value": "保存中…"
+    },
+    {
+      "name": "btn_save_changes",
+      "value": "保存更改"
+    },
+    {
+      "name": "btn_deleting",
+      "value": "删除中…"
+    },
+    {
+      "name": "btn_retry",
+      "value": "重试"
+    },
+    {
+      "name": "btn_close",
+      "value": "关闭"
+    },
+    {
+      "name": "btn_back",
+      "value": "返回"
+    },
+    {
+      "name": "btn_reset",
+      "value": "重置"
+    },
+    {
+      "name": "btn_creating",
+      "value": "创建中…"
+    },
+    {
+      "name": "btn_apply",
+      "value": "应用"
+    },
+    {
+      "name": "btn_copy_backup",
+      "value": "复制备份"
+    },
+    {
+      "name": "btn_export_file",
+      "value": "导出文件"
+    },
+    {
+      "name": "btn_import_merge_short",
+      "value": "导入（合并）"
+    },
+    {
+      "name": "btn_import_replace_short",
+      "value": "导入（替换）"
+    },
+    {
+      "name": "btn_paste_import_merge",
+      "value": "粘贴导入（合并）"
+    },
+    {
+      "name": "btn_paste_import_replace",
+      "value": "粘贴导入（替换）"
+    },
+    {
+      "name": "btn_merging",
+      "value": "合并中…"
+    },
+    {
+      "name": "btn_replacing",
+      "value": "替换中…"
+    },
+    {
+      "name": "btn_clearing",
+      "value": "清除中…"
+    },
+    {
+      "name": "btn_importing",
+      "value": "导入中…"
+    },
+    {
+      "name": "btn_upload_to",
+      "value": "上传到 %1$s"
+    },
+    {
+      "name": "btn_syncing",
+      "value": "同步中…"
+    },
+    {
+      "name": "btn_keep_archive",
+      "value": "保留为存档"
+    },
+    {
+      "name": "btn_clear_local_short",
+      "value": "清除本地"
+    },
+    {
+      "name": "btn_resume_online",
+      "value": "恢复在线模式"
+    },
+    {
+      "name": "btn_resuming",
+      "value": "恢复中…"
+    },
+    {
+      "name": "btn_connect_linkwarden",
+      "value": "连接 Linkwarden"
+    },
+    {
+      "name": "btn_switch_offline",
+      "value": "切换到离线（保持登录）"
+    },
+    {
+      "name": "btn_switching",
+      "value": "切换中…"
+    },
+    {
+      "name": "btn_sign_out",
+      "value": "退出登录"
+    },
+    {
+      "name": "btn_search",
+      "value": "搜索"
+    },
+    {
+      "name": "btn_show_more",
+      "value": "显示更多"
+    },
+    {
+      "name": "btn_show_less",
+      "value": "收起"
+    },
+    {
+      "name": "btn_view_all",
+      "value": "查看全部"
+    },
+    {
+      "name": "btn_pin",
+      "value": "置顶"
+    },
+    {
+      "name": "btn_pinned",
+      "value": "已置顶"
+    },
+    {
+      "name": "title_links",
+      "value": "链接"
+    },
+    {
+      "name": "title_collections",
+      "value": "收藏夹"
+    },
+    {
+      "name": "title_tags",
+      "value": "标签"
+    },
+    {
+      "name": "title_pinned_links",
+      "value": "置顶链接"
+    },
+    {
+      "name": "title_recent_links",
+      "value": "最近链接"
+    },
+    {
+      "name": "title_quick_links",
+      "value": "快捷链接"
+    },
+    {
+      "name": "title_session",
+      "value": "会话"
+    },
+    {
+      "name": "title_edit_link",
+      "value": "编辑链接"
+    },
+    {
+      "name": "title_failed_load",
+      "value": "加载链接详情失败。"
+    },
+    {
+      "name": "title_filter_pinned",
+      "value": "已置顶"
+    },
+    {
+      "name": "title_filter_all",
+      "value": "全部"
     }
   ]
 }

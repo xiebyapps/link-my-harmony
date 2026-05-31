@@ -55,20 +55,20 @@ export struct DashboardPanelComponent {
       // Shortcut cards
       Column({ space: 8 }) {
         Row({ space: 8 }) {
-          this.ShortcutCard('Links', '🔗', this.formatCount(this.linksTotal), () => {
+          this.ShortcutCard($r('app.string.title_links'), 'link', this.formatCount(this.linksTotal), () => {
             this.callbacks.onNavigateAllLinks();
           });
-          this.ShortcutCard('Collections', '🗂', this.collectionsCountLabel, () => {
+          this.ShortcutCard($r('app.string.title_collections'), 'folder', this.collectionsCountLabel, () => {
             this.callbacks.onNavigateCollections();
           });
         }
         .width('100%');
 
         Row({ space: 8 }) {
-          this.ShortcutCard('Tags', '#', this.formatCount(this.tagsTotal), () => {
+          this.ShortcutCard($r('app.string.title_tags'), 'number', this.formatCount(this.tagsTotal), () => {
             this.callbacks.onNavigateTags();
           });
-          this.ShortcutCard('Pinned', '📌', this.formatCount(this.pinnedTotal), () => {
+          this.ShortcutCard($r('app.string.btn_pinned'), 'pin', this.formatCount(this.pinnedTotal), () => {
             this.callbacks.onNavigatePinnedLinks();
           });
         }
@@ -78,27 +78,27 @@ export struct DashboardPanelComponent {
 
       // Pinned links strip
       this.LinkStripSection(
-        '📌 Pinned Links',
+        '📌 ' + $r('app.string.title_pinned_links'),
         this.pinnedLinks.slice(0, 10),
-        'No pinned links.',
+        $r('app.string.msg_no_pinned_links'),
         () => { this.callbacks.onNavigatePinnedLinks(); }
       );
 
       // Recent links strip
       this.LinkStripSection(
-        '🕘 Recent Links',
+        '🕘 ' + $r('app.string.title_recent_links'),
         this.dashboardLinks.slice(0, 10),
-        this.dashboardLoading && this.dashboardLinks.length === 0 ? 'Loading dashboard...' : 'No recent links yet.',
+        this.dashboardLoading && this.dashboardLinks.length === 0 ? $r('app.string.msg_loading_dashboard') : $r('app.string.msg_no_recent_links'),
         () => { this.callbacks.onNavigateRecentLinks(); }
       );
 
       // Collection previews
       if (this.collectionPreviewSections.length === 0) {
-        this.SectionTitle('Collections', () => {
+        this.SectionTitle($r('app.string.title_collections'), () => {
           this.callbacks.onNavigateCollections();
         });
 
-        Text('No collection previews yet.')
+        Text($r('app.string.msg_no_collection_previews'))
           .fontSize(13)
           .fontColor(this.palette().textSecondary)
           .width('100%')
@@ -113,11 +113,12 @@ export struct DashboardPanelComponent {
   }
 
   @Builder
-  private ShortcutCard(title: string, icon: string, value: string, onClick: () => void) {
+  private ShortcutCard(title: string, iconKey: string, value: string, onClick: () => void) {
     Row({ space: 10 }) {
-      Text(icon)
+      SymbolGlyph($r('sys.symbol.' + iconKey))
         .fontSize(20)
         .width(28)
+        .fontColor(this.palette().textPrimary)
         .textAlign(TextAlign.Center);
 
       Column({ space: 2 }) {
@@ -189,7 +190,7 @@ export struct DashboardPanelComponent {
         .layoutWeight(1)
         .textAlign(TextAlign.Start);
 
-      Button('View all')
+      Button($r('app.string.btn_view_all'))
         .backgroundColor(Color.Transparent)
         .fontColor(this.palette().textSecondary)
         .fontSize(12)
@@ -219,14 +220,14 @@ export struct DashboardPanelComponent {
           .textAlign(TextAlign.Start);
 
         if (item.pinned) {
-          Text('Pin')
+          SymbolGlyph($r('sys.symbol.pin_fill'))
             .fontSize(11)
             .fontColor(this.palette().accent);
         }
       }
       .width('100%');
 
-      Text(item.collectionName.length > 0 ? item.collectionName : 'Unorganized')
+      Text(item.collectionName.length > 0 ? item.collectionName : $r('app.string.unorganized'))
         .fontSize(12)
         .fontColor(item.collectionColor.length > 0 ? item.collectionColor : this.palette().accent)
         .maxLines(1)
@@ -263,7 +264,7 @@ export struct DashboardPanelComponent {
   @Builder
   private CollectionPreview(section: CollectionPreviewSection) {
     Column({ space: 8 }) {
-      this.SectionTitle(section.collection.name.length > 0 ? section.collection.name : 'Untitled', () => {
+      this.SectionTitle(section.collection.name.length > 0 ? section.collection.name : $r('app.string.label_untitled'), () => {
         this.callbacks.onNavigateCollection(section.collection.id);
       });
 

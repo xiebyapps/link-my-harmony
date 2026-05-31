@@ -363,6 +363,398 @@
     {
       "name": "tags_count",
       "value": "%1$d tags"
+    },
+    {
+      "name": "label_link_section",
+      "value": "Link"
+    },
+    {
+      "name": "label_collection_section",
+      "value": "Collection"
+    },
+    {
+      "name": "label_new_collection",
+      "value": "New collection"
+    },
+    {
+      "name": "label_selected",
+      "value": "Selected"
+    },
+    {
+      "name": "label_untitled",
+      "value": "Untitled"
+    },
+    {
+      "name": "label_loading",
+      "value": "Loading..."
+    },
+    {
+      "name": "label_loading_detail",
+      "value": "Loading detail..."
+    },
+    {
+      "name": "label_saved_date",
+      "value": "Saved %1$s"
+    },
+    {
+      "name": "label_color",
+      "value": "Color: %1$s"
+    },
+    {
+      "name": "label_parent_collection",
+      "value": "Parent collection: %1$s"
+    },
+    {
+      "name": "label_version_theme",
+      "value": "v0.1.0 · %1$s theme"
+    },
+    {
+      "name": "label_local_data_summary",
+      "value": "%1$d links, %2$d collections stored locally. Back up regularly — data is in the app sandbox."
+    },
+    {
+      "name": "label_not_on_server",
+      "value": "%1$d bookmarks not on server yet."
+    },
+    {
+      "name": "label_import_preview_count",
+      "value": "Contains %1$d links, %2$d collections, %3$d tags."
+    },
+    {
+      "name": "label_exported_at",
+      "value": "Exported %1$s"
+    },
+    {
+      "name": "label_exported_not_recorded",
+      "value": "Exported date not recorded."
+    },
+    {
+      "name": "label_links_count_inline",
+      "value": "%1$d links"
+    },
+    {
+      "name": "label_collections_count_inline",
+      "value": "%1$d collections"
+    },
+    {
+      "name": "label_tags_count_inline",
+      "value": "%1$d tags"
+    },
+    {
+      "name": "hint_paste_url",
+      "value": "Paste a URL or text containing a URL"
+    },
+    {
+      "name": "hint_title_optional",
+      "value": "Title (optional)"
+    },
+    {
+      "name": "hint_tap_to_choose",
+      "value": "Tap to choose"
+    },
+    {
+      "name": "hint_search_links",
+      "value": "Search links"
+    },
+    {
+      "name": "hint_search_collections",
+      "value": "Search collections"
+    },
+    {
+      "name": "hint_search_tags",
+      "value": "Search tags"
+    },
+    {
+      "name": "hint_name",
+      "value": "Name"
+    },
+    {
+      "name": "hint_parent_collection_optional",
+      "value": "Parent collection (optional)"
+    },
+    {
+      "name": "hint_search_or_create_tag",
+      "value": "Search or create tag…"
+    },
+    {
+      "name": "msg_no_url_detected",
+      "value": "No URL detected"
+    },
+    {
+      "name": "msg_no_parent_found",
+      "value": "No matching parent collection found."
+    },
+    {
+      "name": "msg_search_collections_or_create",
+      "value": "Search existing collections or create a new one."
+    },
+    {
+      "name": "msg_no_collections_match",
+      "value": "No collections match the current search."
+    },
+    {
+      "name": "msg_no_links_yet",
+      "value": "No links yet."
+    },
+    {
+      "name": "msg_no_collections",
+      "value": "No collections."
+    },
+    {
+      "name": "msg_no_collections_search",
+      "value": "No collections match this search."
+    },
+    {
+      "name": "msg_loading_links",
+      "value": "Loading links…"
+    },
+    {
+      "name": "msg_no_more_links_period",
+      "value": "No more links."
+    },
+    {
+      "name": "msg_no_pinned_links",
+      "value": "No pinned links."
+    },
+    {
+      "name": "msg_no_recent_links",
+      "value": "No recent links yet."
+    },
+    {
+      "name": "msg_loading_dashboard",
+      "value": "Loading dashboard…"
+    },
+    {
+      "name": "msg_no_collection_previews",
+      "value": "No collection previews yet."
+    },
+    {
+      "name": "msg_search_hint_full",
+      "value": "Insert a search term to search links, collections and tags."
+    },
+    {
+      "name": "msg_change_server_desc",
+      "value": "Change the Linkwarden server URL."
+    },
+    {
+      "name": "msg_import_desc",
+      "value": "Import from file or paste JSON backup."
+    },
+    {
+      "name": "msg_strategy_replace",
+      "value": "Strategy: REPLACE — all current local data will be wiped."
+    },
+    {
+      "name": "msg_strategy_merge",
+      "value": "Strategy: MERGE — existing rows kept; duplicates skipped."
+    },
+    {
+      "name": "msg_not_connected",
+      "value": "Not connected. Sign in to sync across devices."
+    },
+    {
+      "name": "msg_signed_in_switch_hint",
+      "value": "Signed in. Switch to offline to work without server."
+    },
+    {
+      "name": "msg_harmonyos_client",
+      "value": "HarmonyOS Native Client"
+    },
+    {
+      "name": "msg_create_here_hint",
+      "value": "Create it here and return to the link form."
+    },
+    {
+      "name": "msg_sync_title",
+      "value": "Sync local → Linkwarden"
+    },
+    {
+      "name": "btn_adding",
+      "value": "Adding…"
+    },
+    {
+      "name": "btn_saving",
+      "value": "Saving…"
+    },
+    {
+      "name": "btn_save_changes",
+      "value": "Save Changes"
+    },
+    {
+      "name": "btn_deleting",
+      "value": "Deleting…"
+    },
+    {
+      "name": "btn_retry",
+      "value": "Retry"
+    },
+    {
+      "name": "btn_close",
+      "value": "Close"
+    },
+    {
+      "name": "btn_back",
+      "value": "Back"
+    },
+    {
+      "name": "btn_reset",
+      "value": "Reset"
+    },
+    {
+      "name": "btn_creating",
+      "value": "Creating…"
+    },
+    {
+      "name": "btn_apply",
+      "value": "Apply"
+    },
+    {
+      "name": "btn_copy_backup",
+      "value": "Copy backup"
+    },
+    {
+      "name": "btn_export_file",
+      "value": "Export file"
+    },
+    {
+      "name": "btn_import_merge_short",
+      "value": "Import (merge)"
+    },
+    {
+      "name": "btn_import_replace_short",
+      "value": "Import (replace)"
+    },
+    {
+      "name": "btn_paste_import_merge",
+      "value": "Paste import (merge)"
+    },
+    {
+      "name": "btn_paste_import_replace",
+      "value": "Paste import (replace)"
+    },
+    {
+      "name": "btn_merging",
+      "value": "Merging…"
+    },
+    {
+      "name": "btn_replacing",
+      "value": "Replacing…"
+    },
+    {
+      "name": "btn_clearing",
+      "value": "Clearing…"
+    },
+    {
+      "name": "btn_importing",
+      "value": "Importing…"
+    },
+    {
+      "name": "btn_upload_to",
+      "value": "Upload to %1$s"
+    },
+    {
+      "name": "btn_syncing",
+      "value": "Syncing…"
+    },
+    {
+      "name": "btn_keep_archive",
+      "value": "Keep as archive"
+    },
+    {
+      "name": "btn_clear_local_short",
+      "value": "Clear local"
+    },
+    {
+      "name": "btn_resume_online",
+      "value": "Resume online mode"
+    },
+    {
+      "name": "btn_resuming",
+      "value": "Resuming…"
+    },
+    {
+      "name": "btn_connect_linkwarden",
+      "value": "Connect to Linkwarden"
+    },
+    {
+      "name": "btn_switch_offline",
+      "value": "Switch to offline (keep signed in)"
+    },
+    {
+      "name": "btn_switching",
+      "value": "Switching…"
+    },
+    {
+      "name": "btn_sign_out",
+      "value": "Sign Out"
+    },
+    {
+      "name": "btn_search",
+      "value": "Search"
+    },
+    {
+      "name": "btn_show_more",
+      "value": "Show More"
+    },
+    {
+      "name": "btn_show_less",
+      "value": "Show Less"
+    },
+    {
+      "name": "btn_view_all",
+      "value": "View all"
+    },
+    {
+      "name": "btn_pin",
+      "value": "Pin"
+    },
+    {
+      "name": "btn_pinned",
+      "value": "Pinned"
+    },
+    {
+      "name": "title_links",
+      "value": "Links"
+    },
+    {
+      "name": "title_collections",
+      "value": "Collections"
+    },
+    {
+      "name": "title_tags",
+      "value": "Tags"
+    },
+    {
+      "name": "title_pinned_links",
+      "value": "Pinned Links"
+    },
+    {
+      "name": "title_recent_links",
+      "value": "Recent Links"
+    },
+    {
+      "name": "title_quick_links",
+      "value": "Quick Links"
+    },
+    {
+      "name": "title_session",
+      "value": "Session"
+    },
+    {
+      "name": "title_edit_link",
+      "value": "Edit Link"
+    },
+    {
+      "name": "title_failed_load",
+      "value": "Failed to load link detail."
+    },
+    {
+      "name": "title_filter_pinned",
+      "value": "Pinned"
+    },
+    {
+      "name": "title_filter_all",
+      "value": "All"
     }
   ]
 }

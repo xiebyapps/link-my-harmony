@@ -65,7 +65,7 @@ export struct ElementsPanelComponent {
     Column({ space: 12 }) {
       // Segmented control
       Row() {
-        Text('Links')
+        Text($r('app.string.tab_links'))
           .layoutWeight(1)
           .height(32)
           .fontSize(13)
@@ -79,7 +79,7 @@ export struct ElementsPanelComponent {
             this.callbacks.onRefreshLinks();
           });
 
-        Text('Collections')
+        Text($r('app.string.tab_collections'))
           .layoutWeight(1)
           .height(32)
           .fontSize(13)
@@ -93,7 +93,7 @@ export struct ElementsPanelComponent {
             this.callbacks.onRefreshDashboard();
           });
 
-        Text('Tags')
+        Text($r('app.string.tab_tags'))
           .layoutWeight(1)
           .height(32)
           .fontSize(13)
@@ -141,16 +141,15 @@ export struct ElementsPanelComponent {
   private LinksTab() {
     Column({ space: 10 }) {
       Row({ space: 8 }) {
-        Text(`${this.links.length} links`)
+        Text($r('app.string.label_links_count_inline', this.links.length))
           .fontSize(12)
           .fontColor(this.palette().textSecondary)
           .layoutWeight(1)
           .textAlign(TextAlign.Start);
 
         Button() {
-          Text('＋')
-            .fontSize(24)
-            .fontWeight(FontWeight.Bold)
+          SymbolGlyph($r('sys.symbol.plus'))
+            .fontSize(20)
             .fontColor(this.palette().accentText)
             .width('100%')
             .textAlign(TextAlign.Center);
@@ -169,19 +168,27 @@ export struct ElementsPanelComponent {
       .alignItems(VerticalAlign.Center);
 
       Row({ space: 8 }) {
-        Text(this.showPinnedOnly ? '📌 Pinned' : '≡ All')
-          .fontSize(12)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.showPinnedOnly ? this.palette().accentText : this.palette().textSecondary)
-          .padding({ left: 12, right: 12 })
-          .height(36)
-          .backgroundColor(this.showPinnedOnly ? this.palette().accentStrong : this.palette().input)
-          .borderRadius(999)
-          .onClick(() => {
-            this.callbacks.onPinnedFilterToggle();
-          });
+        Row({ space: 4 }) {
+          if (this.showPinnedOnly) {
+            SymbolGlyph($r('sys.symbol.pin_fill'))
+              .fontSize(12)
+              .fontColor(this.palette().accentText);
+          }
+          Text(this.showPinnedOnly ? $r('app.string.title_filter_pinned') : $r('app.string.title_filter_all'))
+            .fontSize(12)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.showPinnedOnly ? this.palette().accentText : this.palette().textSecondary);
+        }
+        .padding({ left: 12, right: 12 })
+        .height(36)
+        .backgroundColor(this.showPinnedOnly ? this.palette().accentStrong : this.palette().input)
+        .borderRadius(999)
+        .alignItems(VerticalAlign.Center)
+        .onClick(() => {
+          this.callbacks.onPinnedFilterToggle();
+        });
 
-        TextInput({ placeholder: '🔍  Search links', text: this.searchQuery })
+        TextInput({ placeholder: $r('app.string.hint_search_links'), text: this.searchQuery })
           .onChange((value: string) => {
             this.callbacks.onSearchQueryChange(value);
           })
@@ -196,8 +203,9 @@ export struct ElementsPanelComponent {
 
       if (this.selectedCollectionFilterId > 0) {
         Row({ space: 6 }) {
-          Text('🗂')
-            .fontSize(12);
+          SymbolGlyph($r('sys.symbol.folder'))
+            .fontSize(12)
+            .fontColor(this.palette().accentText);
           Text(this.activeCollectionName)
             .fontSize(12)
             .fontWeight(FontWeight.Medium)
@@ -205,7 +213,7 @@ export struct ElementsPanelComponent {
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .layoutWeight(1);
-          Text('✕')
+          SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(12)
             .fontColor(this.palette().accentText)
             .onClick(() => {
@@ -221,7 +229,7 @@ export struct ElementsPanelComponent {
       }
 
       if (this.links.length === 0) {
-        Text(this.loading ? 'Loading links…' : 'No links yet.')
+        Text(this.loading ? $r('app.string.msg_loading_links') : $r('app.string.msg_no_links_yet'))
           .fontSize(13)
           .fontColor(this.palette().textSecondary)
           .width('100%')
@@ -246,14 +254,14 @@ export struct ElementsPanelComponent {
       });
 
       if (this.loadingMore) {
-        Text('Loading more…')
+        Text($r('app.string.msg_loading_more'))
           .fontSize(12)
           .fontColor(this.palette().textSecondary)
           .width('100%')
           .textAlign(TextAlign.Center)
           .padding({ top: 8, bottom: 8 });
       } else if (!this.hasMore && this.links.length > 0) {
-        Text('No more links.')
+        Text($r('app.string.msg_no_more_links_period'))
           .fontSize(12)
           .fontColor(this.palette().textSecondary)
           .width('100%')
@@ -268,13 +276,13 @@ export struct ElementsPanelComponent {
   @Builder
   private CollectionsTab() {
     Column({ space: 10 }) {
-      Text(`${this.filteredCollections.length} collections`)
+      Text($r('app.string.label_collections_count_inline', this.filteredCollections.length))
         .fontSize(13)
         .fontColor(this.palette().textSecondary)
         .width('100%')
         .textAlign(TextAlign.Start);
 
-      TextInput({ placeholder: 'Search collections', text: this.collectionSearchQuery })
+      TextInput({ placeholder: $r('app.string.hint_search_collections'), text: this.collectionSearchQuery })
         .onChange((value: string) => {
           this.callbacks.onCollectionSearchChange(value);
         })
@@ -284,7 +292,7 @@ export struct ElementsPanelComponent {
         .width('100%');
 
       if (this.filteredCollections.length === 0) {
-        Text(this.collections.length === 0 ? 'No collections.' : 'No collections match this search.')
+        Text(this.collections.length === 0 ? $r('app.string.msg_no_collections') : $r('app.string.msg_no_collections_search'))
           .fontSize(13)
           .fontColor(this.palette().textSecondary)
           .width('100%')
@@ -311,13 +319,13 @@ export struct ElementsPanelComponent {
   private TagsTab() {
     Scroll() {
       Column({ space: 8 }) {
-        Text(`${this.filteredTags.length} tags`)
+        Text($r('app.string.label_tags_count_inline', this.filteredTags.length))
           .fontSize(13)
           .fontColor(this.palette().textSecondary)
           .width('100%')
           .textAlign(TextAlign.Start);
 
-        TextInput({ placeholder: 'Search tags', text: this.tagSearchQuery })
+        TextInput({ placeholder: $r('app.string.hint_search_tags'), text: this.tagSearchQuery })
           .onChange((value: string) => {
             this.callbacks.onTagSearchChange(value);
           })
@@ -327,7 +335,7 @@ export struct ElementsPanelComponent {
           .width('100%');
 
         if (this.filteredTags.length === 0) {
-          Text('No tags.')
+          Text($r('app.string.msg_no_tags'))
             .fontSize(13)
             .fontColor(this.palette().textSecondary)
             .width('100%')
@@ -363,8 +371,9 @@ export struct ElementsPanelComponent {
           .textAlign(TextAlign.Start);
 
         if (item.pinned) {
-          Text('📌')
-            .fontSize(13);
+          SymbolGlyph($r('sys.symbol.pin_fill'))
+            .fontSize(13)
+            .fontColor(this.palette().accent);
         }
       }
       .width('100%')
@@ -391,7 +400,7 @@ export struct ElementsPanelComponent {
       }
 
       Row({ space: 6 }) {
-        Text(item.collectionName.length > 0 ? item.collectionName : 'Unorganized')
+        Text(item.collectionName.length > 0 ? item.collectionName : $r('app.string.unorganized'))
           .fontSize(11)
           .fontColor(item.collectionColor.length > 0 ? item.collectionColor : this.palette().accent)
           .padding({ left: 8, right: 8, top: 3, bottom: 3 })
@@ -437,7 +446,7 @@ export struct ElementsPanelComponent {
       }
 
       Column({ space: 2 }) {
-        Text(collection.name.length > 0 ? collection.name : 'Untitled')
+        Text(collection.name.length > 0 ? collection.name : $r('app.string.label_untitled'))
           .fontSize(15)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.palette().textPrimary)

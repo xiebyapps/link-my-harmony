@@ -51,34 +51,15 @@ export struct AddLinkOverlayComponent {
     const trimmed = this.newLinkUrl.trim();
     if (trimmed.length === 0) return '';
     const result = extractUrlAndTitle(trimmed);
-    if (result.url.length === 0) return 'No URL detected';
+    if (result.url.length === 0) return 'NO_URL';
     const host = result.url.replace(/^https?:\/\//, '').split('/')[0];
     return result.title.length > 0 ? `${host} — ${result.title}` : host;
   }
 
-  private collectionLabel(): string {
-    if (this.newLinkCollectionQuery.trim().length > 0) {
-      const match = this.collections.find((c) =>
-        c.name.toLowerCase() === this.newLinkCollectionQuery.trim().toLowerCase()
-      );
-      if (match !== undefined) {
-        return match.name;
-      }
-    }
-    return this.newLinkCollectionQuery.length > 0 ? this.newLinkCollectionQuery : 'Unorganized';
-  }
-
-  private collectionHint(): string {
-    if (this.newLinkCollectionQuery.trim().length > 0) {
-      const match = this.collections.find((c) =>
-        c.name.toLowerCase() === this.newLinkCollectionQuery.trim().toLowerCase()
-      );
-      if (match !== undefined) {
-        return match.description.length > 0 ? match.description : 'Collection';
-      }
-      return 'New collection';
-    }
-    return 'Tap to choose';
+  private matchedCollection(): CollectionItem | undefined {
+    const q = this.newLinkCollectionQuery.trim();
+    if (q.length === 0) return undefined;
+    return this.collections.find((c) => c.name.toLowerCase() === q.toLowerCase());
   }
 
   build() {
@@ -104,19 +85,21 @@ export struct AddLinkOverlayComponent {
           .margin({ top: 12, bottom: 6 });
 
         Row() {
-          Text('Add Link')
+          Text($r('app.string.btn_add_link'))
             .fontSize(20)
             .fontWeight(FontWeight.Bold)
             .fontColor(this.palette().textPrimary)
             .layoutWeight(1)
             .textAlign(TextAlign.Start);
 
-          Button('✕')
-            .fontSize(15)
+          Button() {
+            SymbolGlyph($r('sys.symbol.xmark'))
+              .fontSize(15)
+              .fontColor(this.palette().textSecondary);
+          }
             .width(34)
             .height(34)
             .backgroundColor(this.palette().card)
-            .fontColor(this.palette().textSecondary)
             .borderRadius(999)
             .padding(0)
             .onClick(() => {
@@ -131,14 +114,14 @@ export struct AddLinkOverlayComponent {
           Column({ space: 16 }) {
             // URL + Title
             Column({ space: 12 }) {
-              Text('Link')
+              Text($r('app.string.label_link_section'))
                 .fontSize(13)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.palette().textSecondary)
                 .width('100%')
                 .textAlign(TextAlign.Start);
 
-              TextInput({ placeholder: 'Paste a URL or text containing a URL', text: this.newLinkUrl })
+              TextInput({ placeholder: $r('app.string.hint_paste_url'), text: this.newLinkUrl })
                 .onChange((value: string) => {
                   this.callbacks.onUrlChange(value);
                 })
@@ -148,14 +131,14 @@ export struct AddLinkOverlayComponent {
                 .width('100%');
 
               if (this.newLinkUrl.trim().length > 0) {
-                Text(this.urlSummary())
+                Text(this.urlSummary() === 'NO_URL' ? $r('app.string.msg_no_url_detected') : this.urlSummary())
                   .fontSize(12)
                   .fontColor(this.hasResolvedUrl() ? this.palette().textSecondary : this.palette().danger)
                   .width('100%')
                   .textAlign(TextAlign.Start);
               }
 
-              TextInput({ placeholder: 'Title (optional)', text: this.newLinkTitle })
+              TextInput({ placeholder: $r('app.string.hint_title_optional'), text: this.newLinkTitle })
                 .onChange((value: string) => {
                   this.callbacks.onTitleChange(value);
                 })
@@ -171,7 +154,7 @@ export struct AddLinkOverlayComponent {
 
             // Collection
             Column({ space: 12 }) {
-              Text('Collection')
+              Text($r('app.string.label_collection_section'))
                 .fontSize(13)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.palette().textSecondary)
@@ -179,18 +162,23 @@ export struct AddLinkOverlayComponent {
                 .textAlign(TextAlign.Start);
 
               Row({ space: 12 }) {
-                Text('📁')
-                  .fontSize(18);
+                SymbolGlyph($r('sys.symbol.folder'))
+                  .fontSize(18)
+                  .fontColor(this.palette().accent);
 
                 Column({ space: 3 }) {
-                  Text(this.collectionLabel())
+                  Text(this.matchedCollection() !== undefined
+                    ? this.matchedCollection()!.name
+                    : (this.newLinkCollectionQuery.length > 0 ? this.newLinkCollectionQuery : $r('app.string.unorganized')))
                     .fontSize(15)
                     .fontWeight(FontWeight.Medium)
                     .fontColor(this.palette().textPrimary)
                     .width('100%')
                     .textAlign(TextAlign.Start);
 
-                  Text(this.collectionHint())
+                  Text(this.matchedCollection() !== undefined
+                    ? (this.matchedCollection()!.description.length > 0 ? this.matchedCollection()!.description : $r('app.string.label_collection'))
+                    : (this.newLinkCollectionQuery.length > 0 ? $r('app.string.label_new_collection') : $r('app.string.hint_tap_to_choose')))
                     .fontSize(12)
                     .fontColor(this.palette().textSecondary)
                     .width('100%')
@@ -199,10 +187,9 @@ export struct AddLinkOverlayComponent {
                 .layoutWeight(1)
                 .alignItems(HorizontalAlign.Start);
 
-                Text('›')
-                  .fontSize(24)
-                  .fontColor(this.palette().textSecondary)
-                  .fontWeight(FontWeight.Lighter);
+                SymbolGlyph($r('sys.symbol.chevron_right'))
+                  .fontSize(18)
+                  .fontColor(this.palette().textSecondary);
               }
               .padding({ left: 14, right: 14, top: 12, bottom: 12 })
               .borderRadius(12)
@@ -232,7 +219,7 @@ export struct AddLinkOverlayComponent {
             });
 
             // Add button
-            Button(this.loading ? 'Adding...' : 'Add Link')
+            Button(this.loading ? $r('app.string.btn_adding') : $r('app.string.btn_add_link'))
               .width('100%')
               .height(50)
               .fontSize(16)

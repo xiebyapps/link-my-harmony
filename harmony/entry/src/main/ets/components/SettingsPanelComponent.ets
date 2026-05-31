@@ -80,10 +80,14 @@ export struct SettingsPanelComponent {
     return `${n}`;
   }
 
+  private res(key: string): string {
+    return getUIContext().getHostContext().resourceManager.getStringSync(key);
+  }
+
   private themeModeLabel(): string {
-    if (this.themeMode === 'system') return 'System';
-    if (this.themeMode === 'dark') return 'Dark';
-    return 'Light';
+    if (this.themeMode === 'system') return this.res('theme_system');
+    if (this.themeMode === 'dark') return this.res('theme_dark');
+    return this.res('theme_light');
   }
 
   build() {
@@ -98,7 +102,7 @@ export struct SettingsPanelComponent {
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Text(`v0.1.0 · ${this.themeModeLabel()} theme`)
+          Text($r('app.string.label_version_theme', this.themeModeLabel()))
             .fontSize(11)
             .fontColor(this.palette().textSecondary)
             .width('100%')
@@ -111,15 +115,15 @@ export struct SettingsPanelComponent {
 
         // Stats
         Row({ space: 8 }) {
-          this.StatTile(this.formatCount(this.linksTotal), 'Links');
-          this.StatTile(this.formatCount(this.tagsTotal), 'Tags');
-          this.StatTile(this.formatCount(this.pinnedTotal), 'Pinned');
+          this.StatTile(this.formatCount(this.linksTotal), $r('app.string.tab_links'));
+          this.StatTile(this.formatCount(this.tagsTotal), $r('app.string.tab_tags'));
+          this.StatTile(this.formatCount(this.pinnedTotal), $r('app.string.btn_pinned'));
         }
         .width('100%');
 
         // Theme
         Column({ space: 10 }) {
-          Text('Theme')
+          Text($r('app.string.label_theme'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textPrimary)
@@ -140,20 +144,20 @@ export struct SettingsPanelComponent {
 
         // Server
         Column({ space: 10 }) {
-          Text('Server')
+          Text($r('app.string.label_server'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textPrimary)
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Text('Change the Linkwarden server URL.')
+          Text($r('app.string.msg_change_server_desc'))
             .fontSize(12)
             .fontColor(this.palette().textSecondary)
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          TextInput({ placeholder: 'Server URL', text: this.settingsInstance })
+          TextInput({ placeholder: $r('app.string.label_server_url'), text: this.settingsInstance })
             .onChange((value: string) => {
               this.callbacks.onSettingsInstanceChange(value);
             })
@@ -162,7 +166,7 @@ export struct SettingsPanelComponent {
             .borderRadius(12)
             .width('100%');
 
-          Button('Apply')
+          Button($r('app.string.btn_apply'))
             .width('100%')
             .height(44)
             .backgroundColor(this.palette().accentSoft)
@@ -180,21 +184,21 @@ export struct SettingsPanelComponent {
 
         // Local data
         Column({ space: 10 }) {
-          Text('Local Data')
+          Text($r('app.string.label_local_data'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textPrimary)
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Text(`${this.localLinkCount} links, ${this.localCollectionCount} collections stored locally. Back up regularly — data is in the app sandbox.`)
+          Text($r('app.string.label_local_data_summary', this.localLinkCount, this.localCollectionCount))
             .fontSize(12)
             .fontColor(this.palette().textSecondary)
             .width('100%')
             .textAlign(TextAlign.Start);
 
           Row({ space: 8 }) {
-            Button(this.exportingLocal ? '…' : 'Copy backup')
+            Button(this.exportingLocal ? '…' : $r('app.string.btn_copy_backup'))
               .enabled(!this.exportingLocal)
               .layoutWeight(1)
               .height(44)
@@ -206,7 +210,7 @@ export struct SettingsPanelComponent {
                 this.callbacks.onExportLocal();
               });
 
-            Button(this.exportingLocal ? '…' : 'Export file')
+            Button(this.exportingLocal ? '…' : $r('app.string.btn_export_file'))
               .enabled(!this.exportingLocal)
               .layoutWeight(1)
               .height(44)
@@ -220,14 +224,14 @@ export struct SettingsPanelComponent {
           }
           .width('100%');
 
-          Text('Import from file or paste JSON backup.')
+          Text($r('app.string.msg_import_desc'))
             .fontSize(12)
             .fontColor(this.palette().textSecondary)
             .width('100%')
             .textAlign(TextAlign.Start);
 
           Row({ space: 8 }) {
-            Button(this.importingLocal ? '…' : 'Import (merge)')
+            Button(this.importingLocal ? '…' : $r('app.string.btn_import_merge_short'))
               .enabled(!this.importingLocal)
               .layoutWeight(1)
               .height(44)
@@ -239,7 +243,7 @@ export struct SettingsPanelComponent {
                 this.callbacks.onImportFromFile('merge');
               });
 
-            Button(this.importingLocal ? '…' : 'Import (replace)')
+            Button(this.importingLocal ? '…' : $r('app.string.btn_import_replace_short'))
               .enabled(!this.importingLocal)
               .layoutWeight(1)
               .height(44)
@@ -264,7 +268,7 @@ export struct SettingsPanelComponent {
             .height(120);
 
           Row({ space: 8 }) {
-            Button(this.importingLocal ? 'Merging…' : 'Paste import (merge)')
+            Button(this.importingLocal ? $r('app.string.btn_merging') : $r('app.string.btn_paste_import_merge'))
               .enabled(!this.importingLocal)
               .layoutWeight(1)
               .height(44)
@@ -276,7 +280,7 @@ export struct SettingsPanelComponent {
                 this.callbacks.onImportLocal('merge');
               });
 
-            Button(this.importingLocal ? 'Replacing…' : 'Paste import (replace)')
+            Button(this.importingLocal ? $r('app.string.btn_replacing') : $r('app.string.btn_paste_import_replace'))
               .enabled(!this.importingLocal)
               .layoutWeight(1)
               .height(44)
@@ -291,7 +295,7 @@ export struct SettingsPanelComponent {
           .width('100%');
 
           if (this.clearingLocal || (this.localLinkCount + this.localCollectionCount) > 0) {
-            Button(this.clearingLocal ? 'Clearing…' : 'Clear local data')
+            Button(this.clearingLocal ? $r('app.string.btn_clearing') : $r('app.string.btn_clear_local'))
               .enabled(!this.clearingLocal)
               .width('100%')
               .height(44)
@@ -312,35 +316,35 @@ export struct SettingsPanelComponent {
         // Preview
         if (this.previewVisible) {
           Column({ space: 10 }) {
-            Text('Import preview')
+            Text($r('app.string.title_import_preview'))
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.palette().textPrimary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Text(`Contains ${this.previewLinkCount} links, ${this.previewCollectionCount} collections, ${this.previewTagCount} tags.`)
+            Text($r('app.string.label_import_preview_count', this.previewLinkCount, this.previewCollectionCount, this.previewTagCount))
               .fontSize(12)
               .fontColor(this.palette().textPrimary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Text(this.previewExportedAt.length > 0 ? `Exported ${this.previewExportedAt}` : 'Exported date not recorded.')
+            Text(this.previewExportedAt.length > 0 ? $r('app.string.label_exported_at', this.previewExportedAt) : $r('app.string.label_exported_not_recorded'))
               .fontSize(12)
               .fontColor(this.palette().textSecondary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
             Text(this.previewStrategy === 'replace'
-              ? 'Strategy: REPLACE — all current local data will be wiped.'
-              : 'Strategy: MERGE — existing rows kept; duplicates skipped.')
+              ? $r('app.string.msg_strategy_replace')
+              : $r('app.string.msg_strategy_merge'))
               .fontSize(12)
               .fontColor(this.previewStrategy === 'replace' ? this.palette().danger : this.palette().textPrimary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
             Row({ space: 8 }) {
-              Button(this.importingLocal ? 'Importing…' : 'Confirm import')
+              Button(this.importingLocal ? $r('app.string.btn_importing') : $r('app.string.btn_confirm_import'))
                 .enabled(!this.importingLocal)
                 .layoutWeight(1)
                 .height(44)
@@ -377,20 +381,20 @@ export struct SettingsPanelComponent {
         if (this.sessionMode === 'online' && this.token.length > 0
             && (this.localLinkCount + this.localCollectionCount) > 0) {
           Column({ space: 10 }) {
-            Text('Sync local → Linkwarden')
+            Text($r('app.string.msg_sync_title'))
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.palette().textPrimary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Text(`${this.localLinkCount} bookmarks not on server yet.`)
+            Text($r('app.string.label_not_on_server', this.localLinkCount))
               .fontSize(12)
               .fontColor(this.palette().textSecondary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Button(this.localSyncRunning ? 'Syncing…' : `Upload to ${this.instance}`)
+            Button(this.localSyncRunning ? $r('app.string.btn_syncing') : $r('app.string.btn_upload_to', this.instance))
               .enabled(!this.localSyncRunning)
               .width('100%')
               .height(44)
@@ -418,7 +422,7 @@ export struct SettingsPanelComponent {
                 .textAlign(TextAlign.Start);
 
               Row({ space: 8 }) {
-                Button('Keep as archive')
+                Button($r('app.string.btn_keep_archive'))
                   .layoutWeight(1)
                   .height(44)
                   .backgroundColor(this.palette().accentSoft)
@@ -429,7 +433,7 @@ export struct SettingsPanelComponent {
                     this.callbacks.onMergeArchiveKeep();
                   });
 
-                Button(this.clearingLocal ? 'Clearing…' : 'Clear local')
+                Button(this.clearingLocal ? $r('app.string.btn_clearing') : $r('app.string.btn_clear_local_short'))
                   .enabled(!this.clearingLocal)
                   .layoutWeight(1)
                   .height(44)
@@ -453,7 +457,7 @@ export struct SettingsPanelComponent {
 
         // Quick links
         Column({ space: 10 }) {
-          Text('Quick Links')
+          Text($r('app.string.title_quick_links'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textPrimary)
@@ -480,7 +484,7 @@ export struct SettingsPanelComponent {
 
         // Session
         Column({ space: 10 }) {
-          Text('Session')
+          Text($r('app.string.title_session'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textPrimary)
@@ -488,14 +492,14 @@ export struct SettingsPanelComponent {
             .textAlign(TextAlign.Start);
 
           if (this.sessionMode === 'offline') {
-            Text('Not connected. Sign in to sync across devices.')
+            Text($r('app.string.msg_not_connected'))
               .fontSize(12)
               .fontColor(this.palette().textSecondary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
             if (this.token.length > 0) {
-              Button(this.loading ? 'Resuming…' : 'Resume online mode')
+              Button(this.loading ? $r('app.string.btn_resuming') : $r('app.string.btn_resume_online'))
                 .enabled(!this.loading)
                 .width('100%')
                 .height(44)
@@ -507,7 +511,7 @@ export struct SettingsPanelComponent {
                   this.callbacks.onResumeOnline();
                 });
             } else {
-              Button('Connect to Linkwarden')
+              Button($r('app.string.btn_connect_linkwarden'))
                 .width('100%')
                 .height(44)
                 .backgroundColor(this.palette().accentSoft)
@@ -519,13 +523,13 @@ export struct SettingsPanelComponent {
                 });
             }
           } else {
-            Text('Signed in. Switch to offline to work without server.')
+            Text($r('app.string.msg_signed_in_switch_hint'))
               .fontSize(12)
               .fontColor(this.palette().textSecondary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Button(this.loading ? 'Switching…' : 'Switch to offline (keep signed in)')
+            Button(this.loading ? $r('app.string.btn_switching') : $r('app.string.btn_switch_offline'))
               .enabled(!this.loading)
               .width('100%')
               .height(44)
@@ -537,7 +541,7 @@ export struct SettingsPanelComponent {
                 this.callbacks.onSwitchToOffline();
               });
 
-            Button('Sign Out')
+            Button($r('app.string.btn_sign_out'))
               .width('100%')
               .height(44)
               .backgroundColor('transparent')
@@ -601,7 +605,7 @@ export struct SettingsPanelComponent {
           .width('100%');
         }
 
-        Text('HarmonyOS Native Client')
+        Text($r('app.string.msg_harmonyos_client'))
           .fontSize(12)
           .fontColor(this.palette().textSecondary)
           .width('100%')
@@ -643,7 +647,7 @@ export struct SettingsPanelComponent {
   private ThemeOptionButton(mode: ThemeMode, title: string, subtitle: string) {
     Button() {
       Column({ space: 4 }) {
-        Text(title)
+        Text($r('app.string.' + title))
           .fontSize(13)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.isThemeOptionSelected(mode) ? this.palette().accentText : this.palette().textPrimary)

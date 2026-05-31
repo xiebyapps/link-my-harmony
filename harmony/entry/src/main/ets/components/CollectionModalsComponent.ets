@@ -44,9 +44,9 @@ export struct CollectionOverlayComponent {
   private parentSummary(): string {
     const matched = this.matchedParent();
     if (matched === null) {
-      return 'No matching parent collection found.';
+      return 'NO_PARENT';
     }
-    return `Parent collection: ${matched.name}`;
+    return matched.name;
   }
 
   build() {
@@ -62,14 +62,14 @@ export struct CollectionOverlayComponent {
       Column({ space: 12 }) {
         Row() {
           Column({ space: 4 }) {
-            Text('Create Collection')
+            Text($r('app.string.title_create_collection'))
               .fontSize(20)
               .fontWeight(FontWeight.Bold)
               .fontColor(this.palette().textPrimary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Text('Create it here and return to the link form.')
+            Text($r('app.string.msg_create_here_hint'))
               .fontSize(12)
               .fontColor(this.palette().textSecondary)
               .width('100%')
@@ -78,7 +78,7 @@ export struct CollectionOverlayComponent {
           .layoutWeight(1)
           .alignItems(HorizontalAlign.Start);
 
-          Button('Back')
+          Button($r('app.string.btn_back'))
             .backgroundColor(this.palette().card)
             .fontColor(this.palette().textPrimary)
             .borderRadius(999)
@@ -90,27 +90,29 @@ export struct CollectionOverlayComponent {
         .alignItems(VerticalAlign.Center);
 
         Column({ space: 10 }) {
-          TextInput({ placeholder: 'Name', text: this.name })
+          TextInput({ placeholder: $r('app.string.hint_name'), text: this.name })
             .onChange((value: string) => {
               this.callbacks.onNameChange(value);
             })
             .width('100%');
 
-          TextInput({ placeholder: 'Description (optional)', text: this.description })
+          TextInput({ placeholder: $r('app.string.label_description_optional'), text: this.description })
             .onChange((value: string) => {
               this.callbacks.onDescriptionChange(value);
             })
             .height(88)
             .width('100%');
 
-          TextInput({ placeholder: 'Parent collection (optional)', text: this.parentQuery })
+          TextInput({ placeholder: $r('app.string.hint_parent_collection_optional'), text: this.parentQuery })
             .onChange((value: string) => {
               this.callbacks.onParentQueryChange(value);
             })
             .width('100%');
 
           if (this.parentQuery.trim().length > 0) {
-            Text(this.parentSummary())
+            Text(this.parentSummary() === 'NO_PARENT'
+              ? $r('app.string.msg_no_parent_found')
+              : $r('app.string.label_parent_collection', this.parentSummary()))
               .fontSize(12)
               .fontColor(this.matchedParent() !== null ? this.palette().textSecondary : this.palette().danger)
               .width('100%')
@@ -126,7 +128,7 @@ export struct CollectionOverlayComponent {
           }
           .width('100%');
 
-          Text(`Color: ${this.color}`)
+          Text($r('app.string.label_color', this.color))
             .fontSize(12)
             .fontColor(this.palette().textSecondary)
             .width('100%')
@@ -138,7 +140,7 @@ export struct CollectionOverlayComponent {
         .width('100%');
 
         Row({ space: 8 }) {
-          Button('Reset')
+          Button($r('app.string.btn_reset'))
             .layoutWeight(1)
             .backgroundColor(this.palette().card)
             .fontColor(this.palette().textPrimary)
@@ -147,7 +149,7 @@ export struct CollectionOverlayComponent {
               this.callbacks.onReset();
             });
 
-          Button(this.saving ? 'Creating...' : 'Create')
+          Button(this.saving ? $r('app.string.btn_creating') : $r('app.string.btn_create'))
             .layoutWeight(1)
             .backgroundColor(this.palette().accentStrong)
             .fontColor(this.palette().accentText)
@@ -239,14 +241,14 @@ export struct CollectionPickerOverlayComponent {
       Column({ space: 12 }) {
         Row() {
           Column({ space: 4 }) {
-            Text('Choose Collection')
+            Text($r('app.string.title_choose_collection'))
               .fontSize(20)
               .fontWeight(FontWeight.Bold)
               .fontColor(this.palette().textPrimary)
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Text('Search existing collections or create a new one.')
+            Text($r('app.string.msg_search_collections_or_create'))
               .fontSize(12)
               .fontColor(this.palette().textSecondary)
               .width('100%')
@@ -255,7 +257,7 @@ export struct CollectionPickerOverlayComponent {
           .layoutWeight(1)
           .alignItems(HorizontalAlign.Start);
 
-          Button('Back')
+          Button($r('app.string.btn_back'))
             .backgroundColor(this.palette().card)
             .fontColor(this.palette().textPrimary)
             .borderRadius(999)
@@ -266,14 +268,14 @@ export struct CollectionPickerOverlayComponent {
         .width('100%')
         .alignItems(VerticalAlign.Center);
 
-        TextInput({ placeholder: 'Search collections', text: this.query })
+        TextInput({ placeholder: $r('app.string.hint_search_collections'), text: this.query })
           .onChange((value: string) => {
             this.callbacks.onQueryChange(value);
           })
           .width('100%');
 
         Row({ space: 8 }) {
-          Button('Unorganized')
+          Button($r('app.string.unorganized'))
             .layoutWeight(1)
             .backgroundColor(this.selectedId === 0 ? this.palette().accentStrong : this.palette().card)
             .fontColor(this.selectedId === 0 ? this.palette().accentText : this.palette().textPrimary)
@@ -315,7 +317,7 @@ export struct CollectionPickerOverlayComponent {
                 .alignItems(HorizontalAlign.Start);
 
                 if (this.selectedId === item.id) {
-                  Text('Selected')
+                  Text($r('app.string.label_selected'))
                     .fontSize(12)
                     .fontColor(this.palette().accent);
                 }
@@ -330,7 +332,7 @@ export struct CollectionPickerOverlayComponent {
             }, (item: CollectionItem) => `${item.id}`);
 
             if (this.filteredCollections().length === 0) {
-              Text('No collections match the current search.')
+              Text($r('app.string.msg_no_collections_match'))
                 .fontSize(12)
                 .fontColor(this.palette().textSecondary)
                 .width('100%')

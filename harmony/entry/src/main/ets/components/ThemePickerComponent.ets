@@ -27,7 +27,7 @@ export struct ThemePickerComponent {
 
   build() {
     Column({ space: 8 }) {
-      Text('Theme')
+      Text($r('app.string.label_theme'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.palette().textPrimary)
@@ -38,7 +38,7 @@ export struct ThemePickerComponent {
         ForEach(createThemeOptions(), (option: ThemeOption) => {
           Button() {
             Column({ space: 4 }) {
-              Text(option.title)
+              Text($r('app.string.' + option.title))
                 .fontSize(13)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.isSelected(option.mode) ? this.palette().accentText : this.palette().textPrimary)

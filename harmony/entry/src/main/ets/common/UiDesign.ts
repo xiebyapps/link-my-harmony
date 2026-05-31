@@ -130,9 +130,9 @@ export function createDockMetrics(): DockMetrics {
 
 export function createThemeOptions(): Array<ThemeOption> {
   return [
-    { mode: 'system', title: 'System', subtitle: 'Auto' },
-    { mode: 'light', title: 'Light', subtitle: 'Bright' },
-    { mode: 'dark', title: 'Dark', subtitle: 'Dim' },
+    { mode: 'system', title: 'theme_system', subtitle: 'Auto' },
+    { mode: 'light', title: 'theme_light', subtitle: 'Bright' },
+    { mode: 'dark', title: 'theme_dark', subtitle: 'Dim' },
   ];
 }
 

@@ -50,29 +50,10 @@ export struct EditLinkOverlayComponent {
     return createThemePalette(effectiveMode);
   }
 
-  private collectionLabel(): string {
-    if (this.editCollectionQuery.trim().length > 0) {
-      const match = this.collections.find((c) =>
-        c.name.toLowerCase() === this.editCollectionQuery.trim().toLowerCase()
-      );
-      if (match !== undefined) {
-        return match.name;
-      }
-    }
-    return this.editCollectionQuery.length > 0 ? this.editCollectionQuery : 'Unorganized';
-  }
-
-  private collectionHint(): string {
-    if (this.editCollectionQuery.trim().length > 0) {
-      const match = this.collections.find((c) =>
-        c.name.toLowerCase() === this.editCollectionQuery.trim().toLowerCase()
-      );
-      if (match !== undefined) {
-        return match.description.length > 0 ? match.description : 'Collection';
-      }
-      return 'New collection';
-    }
-    return 'Tap to choose';
+  private matchedCollection(): CollectionItem | undefined {
+    const q = this.editCollectionQuery.trim();
+    if (q.length === 0) return undefined;
+    return this.collections.find((c) => c.name.toLowerCase() === q.toLowerCase());
   }
 
   private formatDateLabel(dateStr: string): string {
@@ -107,19 +88,21 @@ export struct EditLinkOverlayComponent {
           .margin({ top: 12, bottom: 6 });
 
         Row() {
-          Text(this.detailLoading ? 'Loading...' : 'Edit Link')
+          Text(this.detailLoading ? $r('app.string.label_loading') : $r('app.string.title_edit_link'))
             .fontSize(20)
             .fontWeight(FontWeight.Bold)
             .fontColor(this.palette().textPrimary)
             .layoutWeight(1)
             .textAlign(TextAlign.Start);
 
-          Button('✕')
-            .fontSize(15)
+          Button() {
+            SymbolGlyph($r('sys.symbol.xmark'))
+              .fontSize(15)
+              .fontColor(this.palette().textSecondary);
+          }
             .width(34)
             .height(34)
             .backgroundColor(this.palette().card)
-            .fontColor(this.palette().textSecondary)
             .borderRadius(999)
             .padding(0)
             .onClick(() => {
@@ -161,14 +144,14 @@ export struct EditLinkOverlayComponent {
         Column({ space: 10 }) {
           Row({ space: 10 }) {
             Column({ space: 4 }) {
-              Text(this.selectedLink.collectionName.length > 0 ? this.selectedLink.collectionName : 'Unorganized')
+              Text(this.selectedLink.collectionName.length > 0 ? this.selectedLink.collectionName : $r('app.string.unorganized'))
                 .fontSize(13)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.selectedLink.collectionColor.length > 0 ? this.selectedLink.collectionColor : this.palette().accent)
                 .textAlign(TextAlign.Start);
 
               if (this.selectedLink.createdAt.length > 0) {
-                Text(`Saved ${this.formatDateLabel(this.selectedLink.createdAt)}`)
+                Text($r('app.string.label_saved_date', this.formatDateLabel(this.selectedLink.createdAt)))
                   .fontSize(12)
                   .fontColor(this.palette().textSecondary)
                   .textAlign(TextAlign.Start);
@@ -177,7 +160,7 @@ export struct EditLinkOverlayComponent {
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start);
 
-            Button(this.pinSaving ? '…' : (this.editPinned ? '📌 Pinned' : 'Pin'))
+            Button(this.pinSaving ? '…' : (this.editPinned ? '📌 ' + $r('app.string.btn_pinned') : $r('app.string.btn_pin')))
               .fontSize(13)
               .height(34)
               .backgroundColor(this.editPinned ? this.palette().accentStrong : this.palette().surface)
@@ -198,14 +181,14 @@ export struct EditLinkOverlayComponent {
 
         // Link fields
         Column({ space: 12 }) {
-          Text('Link')
+          Text($r('app.string.label_link_section'))
             .fontSize(13)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textSecondary)
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          TextInput({ placeholder: 'Title', text: this.editName })
+          TextInput({ placeholder: $r('app.string.label_link_name'), text: this.editName })
             .onChange((value: string) => {
               this.callbacks.onEditNameChange(value);
             })
@@ -213,7 +196,7 @@ export struct EditLinkOverlayComponent {
             .borderRadius(10)
             .width('100%');
 
-          TextInput({ placeholder: 'URL', text: this.editUrl })
+          TextInput({ placeholder: $r('app.string.label_link_url'), text: this.editUrl })
             .onChange((value: string) => {
               this.callbacks.onEditUrlChange(value);
             })
@@ -221,7 +204,7 @@ export struct EditLinkOverlayComponent {
             .borderRadius(10)
             .width('100%');
 
-          TextInput({ placeholder: 'Description', text: this.editDescription })
+          TextInput({ placeholder: $r('app.string.label_description'), text: this.editDescription })
             .onChange((value: string) => {
               this.callbacks.onEditDescriptionChange(value);
             })
@@ -237,7 +220,7 @@ export struct EditLinkOverlayComponent {
 
         // Collection picker
         Column({ space: 12 }) {
-          Text('Collection')
+          Text($r('app.string.label_collection_section'))
             .fontSize(13)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textSecondary)
@@ -245,18 +228,23 @@ export struct EditLinkOverlayComponent {
             .textAlign(TextAlign.Start);
 
           Row({ space: 12 }) {
-            Text('📁')
-              .fontSize(18);
+            SymbolGlyph($r('sys.symbol.folder'))
+              .fontSize(18)
+              .fontColor(this.palette().accent);
 
             Column({ space: 3 }) {
-              Text(this.collectionLabel())
+              Text(this.matchedCollection() !== undefined
+                ? this.matchedCollection()!.name
+                : (this.editCollectionQuery.length > 0 ? this.editCollectionQuery : $r('app.string.unorganized')))
                 .fontSize(15)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.palette().textPrimary)
                 .width('100%')
                 .textAlign(TextAlign.Start);
 
-              Text(this.collectionHint())
+              Text(this.matchedCollection() !== undefined
+                ? (this.matchedCollection()!.description.length > 0 ? this.matchedCollection()!.description : $r('app.string.label_collection'))
+                : (this.editCollectionQuery.length > 0 ? $r('app.string.label_new_collection') : $r('app.string.hint_tap_to_choose')))
                 .fontSize(12)
                 .fontColor(this.palette().textSecondary)
                 .width('100%')
@@ -265,10 +253,9 @@ export struct EditLinkOverlayComponent {
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start);
 
-            Text('›')
-              .fontSize(24)
-              .fontColor(this.palette().textSecondary)
-              .fontWeight(FontWeight.Lighter);
+            SymbolGlyph($r('sys.symbol.chevron_right'))
+              .fontSize(18)
+              .fontColor(this.palette().textSecondary);
           }
           .padding({ left: 14, right: 14, top: 12, bottom: 12 })
           .borderRadius(12)
@@ -298,7 +285,7 @@ export struct EditLinkOverlayComponent {
         });
 
         // Save button
-        Button(this.detailSaving ? 'Saving...' : 'Save Changes')
+        Button(this.detailSaving ? $r('app.string.btn_saving') : $r('app.string.btn_save_changes'))
           .width('100%')
           .height(50)
           .fontSize(16)
@@ -312,7 +299,7 @@ export struct EditLinkOverlayComponent {
           });
 
         // Delete button
-        Button(this.detailDeleting ? 'Deleting...' : 'Delete Link')
+        Button(this.detailDeleting ? $r('app.string.btn_deleting') : $r('app.string.btn_delete_link'))
           .width('100%')
           .height(44)
           .fontSize(14)
@@ -326,14 +313,14 @@ export struct EditLinkOverlayComponent {
       } else if (!this.detailLoading && this.detailFailedLinkId > 0) {
         // Error state
         Column({ space: 12 }) {
-          Text('Failed to load link detail.')
+          Text($r('app.string.title_failed_load'))
             .fontSize(14)
             .fontColor(this.palette().danger)
             .width('100%')
             .textAlign(TextAlign.Center);
 
           Row({ space: 12 }) {
-            Button('Retry')
+            Button($r('app.string.btn_retry'))
               .fontSize(14)
               .height(40)
               .layoutWeight(1)
@@ -344,7 +331,7 @@ export struct EditLinkOverlayComponent {
                 this.callbacks.onRetry();
               });
 
-            Button('Close')
+            Button($r('app.string.btn_close'))
               .fontSize(14)
               .height(40)
               .layoutWeight(1)
@@ -367,13 +354,13 @@ export struct EditLinkOverlayComponent {
               .width(16)
               .height(16)
               .color(this.palette().textSecondary);
-            Text('Loading detail...')
+            Text($r('app.string.label_loading_detail'))
               .fontSize(13)
               .fontColor(this.palette().textSecondary);
           }
           .width('100%');
 
-          Button('Cancel')
+          Button($r('app.string.btn_cancel'))
             .fontSize(13)
             .height(36)
             .backgroundColor(this.palette().surface)

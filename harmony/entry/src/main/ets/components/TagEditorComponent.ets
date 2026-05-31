@@ -41,7 +41,7 @@ export struct TagEditorComponent {
 
   build() {
     Column({ space: 10 }) {
-      Text('Tags')
+      Text($r('app.string.label_tags'))
         .fontSize(13)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.palette().textSecondary)
@@ -79,7 +79,7 @@ export struct TagEditorComponent {
 
       // Search/create input
       Row({ space: 10 }) {
-        TextInput({ placeholder: 'Search or create tag…', text: this.tagPickerQuery })
+        TextInput({ placeholder: $r('app.string.hint_search_or_create_tag'), text: this.tagPickerQuery })
           .onChange((value: string) => {
             this.callbacks.onTagPickerQueryChange(value);
           })

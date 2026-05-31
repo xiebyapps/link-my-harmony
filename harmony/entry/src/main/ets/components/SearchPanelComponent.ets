@@ -44,7 +44,7 @@ export struct SearchPanelComponent {
     Scroll() {
       Column({ space: 10 }) {
         // Title
-        Text('Search')
+        Text($r('app.string.nav_search'))
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
           .fontColor(this.palette().textPrimary)
@@ -53,7 +53,7 @@ export struct SearchPanelComponent {
 
         // Search input
         Row({ space: 8 }) {
-          TextInput({ placeholder: 'Search links, collections, tags', text: this.searchQuery })
+          TextInput({ placeholder: $r('app.string.hint_search'), text: this.searchQuery })
             .onChange((value: string) => {
               this.callbacks.onSearchQueryChange(value);
             })
@@ -62,7 +62,7 @@ export struct SearchPanelComponent {
             .borderRadius(12)
             .layoutWeight(1);
 
-          Button('Search')
+          Button($r('app.string.btn_search'))
             .height(44)
             .backgroundColor(this.palette().accentSoft)
             .fontColor(this.palette().accent)
@@ -75,7 +75,7 @@ export struct SearchPanelComponent {
         .width('100%');
 
         if (this.searchQuery.trim().length === 0) {
-          Text('Insert a search term to search links, collections and tags.')
+          Text($r('app.string.msg_search_hint_full'))
             .fontSize(13)
             .fontColor(this.palette().textSecondary)
             .width('100%')
@@ -83,7 +83,7 @@ export struct SearchPanelComponent {
             .padding({ top: 8, bottom: 8 });
         } else {
           if (!this.hasAnyResult) {
-            Text('No results found for this search term.')
+            Text($r('app.string.msg_no_results'))
               .fontSize(13)
               .fontColor(this.palette().textSecondary)
               .width('100%')
@@ -92,12 +92,12 @@ export struct SearchPanelComponent {
           }
 
           // Links
-          this.ResultGroup('Links', this.filteredLinks.length);
+          this.ResultGroup($r('app.string.title_links'), this.filteredLinks.length);
           ForEach(this.filteredLinks.slice(0, this.showAllLinks ? this.filteredLinks.length : 5), (item: LinkItem) => {
             this.LinkResultCard(item);
           }, (item: LinkItem) => `search-link-${item.id}`);
           if (this.filteredLinks.length > 5) {
-            Button(this.showAllLinks ? 'Show Less' : 'Show More')
+            Button(this.showAllLinks ? $r('app.string.btn_show_less') : $r('app.string.btn_show_more'))
               .fontColor(this.palette().accent)
               .backgroundColor(this.palette().card)
               .borderRadius(10)
@@ -107,12 +107,12 @@ export struct SearchPanelComponent {
           }
 
           // Collections
-          this.ResultGroup('Collections', this.filteredCollections.length);
+          this.ResultGroup($r('app.string.title_collections'), this.filteredCollections.length);
           ForEach(this.filteredCollections.slice(0, this.showAllCollections ? this.filteredCollections.length : 5), (collection: CollectionItem) => {
             this.CollectionResultRow(collection);
           }, (collection: CollectionItem) => `search-collection-${collection.id}`);
           if (this.filteredCollections.length > 5) {
-            Button(this.showAllCollections ? 'Show Less' : 'Show More')
+            Button(this.showAllCollections ? $r('app.string.btn_show_less') : $r('app.string.btn_show_more'))
               .fontColor(this.palette().accent)
               .backgroundColor(this.palette().card)
               .borderRadius(10)
@@ -122,12 +122,12 @@ export struct SearchPanelComponent {
           }
 
           // Tags
-          this.ResultGroup('Tags', this.filteredTags.length);
+          this.ResultGroup($r('app.string.title_tags'), this.filteredTags.length);
           ForEach(this.filteredTags.slice(0, this.showAllTags ? this.filteredTags.length : 10), (tag: string) => {
             this.TagResultRow(tag);
           }, (tag: string) => `search-tag-${tag}`);
           if (this.filteredTags.length > 10) {
-            Button(this.showAllTags ? 'Show Less' : 'Show More')
+            Button(this.showAllTags ? $r('app.string.btn_show_less') : $r('app.string.btn_show_more'))
               .fontColor(this.palette().accent)
               .backgroundColor(this.palette().card)
               .borderRadius(10)
@@ -175,8 +175,9 @@ export struct SearchPanelComponent {
           .textAlign(TextAlign.Start);
 
         if (item.pinned) {
-          Text('📌')
-            .fontSize(13);
+          SymbolGlyph($r('sys.symbol.pin_fill'))
+            .fontSize(13)
+            .fontColor(this.palette().accent);
         }
       }
       .width('100%')
@@ -203,7 +204,7 @@ export struct SearchPanelComponent {
       }
 
       Row({ space: 6 }) {
-        Text(item.collectionName.length > 0 ? item.collectionName : 'Unorganized')
+        Text(item.collectionName.length > 0 ? item.collectionName : $r('app.string.unorganized'))
           .fontSize(11)
           .fontColor(item.collectionColor.length > 0 ? item.collectionColor : this.palette().accent)
           .padding({ left: 8, right: 8, top: 3, bottom: 3 })
@@ -250,7 +251,7 @@ export struct SearchPanelComponent {
       }
 
       Column({ space: 2 }) {
-        Text(collection.name.length > 0 ? collection.name : 'Untitled')
+        Text(collection.name.length > 0 ? collection.name : $r('app.string.label_untitled'))
           .fontSize(15)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.palette().textPrimary)
