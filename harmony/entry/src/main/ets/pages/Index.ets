@@ -2700,7 +2700,16 @@ struct Index {
       this.tagsTotal = totals !== null && totals.numberOfTags !== null
         ? totals.numberOfTags
         : result[4].length;
-      this.linksTotal = result[2].reduce((sum: number, c: CollectionItem) => sum + c.linkCount, 0);
+      const collectionLinkTotal = result[2].reduce((sum: number, c: CollectionItem) => sum + c.linkCount, 0);
+      if (this.sessionMode === 'offline') {
+        try {
+          this.linksTotal = await this.service.countLocalLinks();
+        } catch (_) {
+          this.linksTotal = collectionLinkTotal;
+        }
+      } else {
+        this.linksTotal = collectionLinkTotal;
+      }
       this.mergeTagNamesFromTags(result[4]);
     } catch (error) {
       this.setNotice(`Fetch dashboard failed: ${this.formatError(error)}`, true);
