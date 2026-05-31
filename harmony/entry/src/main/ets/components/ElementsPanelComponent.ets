@@ -46,7 +46,11 @@ export struct ElementsPanelComponent {
   @Prop linksRefreshing: boolean = false;
   @Prop collectionsRefreshing: boolean = false;
   @Prop tagsRefreshing: boolean = false;
-  @Prop tagUsageCount: (tag: string) => number = () => 0;
+  private tagUsageCount(tagName: string): number {
+    return this.links.filter((item: LinkItem) =>
+      item.tags.some((tag) => tag.name.toLowerCase() === tagName.toLowerCase())
+    ).length;
+  }
   @Prop themeMode: ThemeMode = 'system';
   @Prop deviceDarkMode: boolean = false;
   @Prop callbacks: ElementsPanelCallbacks = {} as ElementsPanelCallbacks;

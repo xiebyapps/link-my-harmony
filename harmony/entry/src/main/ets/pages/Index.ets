@@ -410,11 +410,13 @@ struct Index {
       ThemePickerComponent({
         themeMode: this.themeMode,
         deviceDarkMode: this.deviceDarkMode,
-        onThemeChange: (mode: ThemeMode) => {
-          this.themeMode = mode;
-          this.persistSessionState().catch((e: Object) => {
-            console.warn('Theme persist failed: ' + String(e));
-          });
+        handlers: {
+          onThemeChange: (mode: ThemeMode) => {
+            this.themeMode = mode;
+            this.persistSessionState().catch((e: Object) => {
+              console.warn('Theme persist failed: ' + String(e));
+            });
+          },
         },
       });
 
@@ -536,7 +538,6 @@ struct Index {
               linksRefreshing: this.linksRefreshing,
               collectionsRefreshing: this.collectionsRefreshing,
               tagsRefreshing: this.tagsRefreshing,
-              tagUsageCount: (tag: string) => this.tagUsageCount(tag),
               themeMode: this.themeMode,
               deviceDarkMode: this.deviceDarkMode,
               callbacks: this.elementsCallbacks(),
@@ -1084,10 +1085,6 @@ struct Index {
     this.collectionPickerSource = source;
     this.collectionPickerQuery = '';
     this.activeModal = 'collection-picker';
-  }
-
-  private tagUsageCount(tagName: string): number {
-    return this.links.filter((item: LinkItem) => item.tags.some((tag) => tag.name.toLowerCase() === tagName.toLowerCase())).length;
   }
 
   private selectCollectionFromPicker(collection: CollectionItem | null): void {

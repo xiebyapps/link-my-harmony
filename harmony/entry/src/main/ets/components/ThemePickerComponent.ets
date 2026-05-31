@@ -4,11 +4,16 @@
 import type { ThemeMode } from '../common/SessionState';
 import { createThemePalette, createThemeOptions, type ThemePalette, type ThemeOption } from '../common/UiDesign';
 
+// Wrapper for callbacks — ArkUI @Prop does not support bare function types.
+export interface ThemePickerHandlers {
+  onThemeChange: (mode: ThemeMode) => void;
+}
+
 @Component
 export struct ThemePickerComponent {
   @Prop themeMode: ThemeMode = 'system';
   @Prop deviceDarkMode: boolean = false;
-  @Prop onThemeChange: (mode: ThemeMode) => void = () => {};
+  @Prop handlers: ThemePickerHandlers = { onThemeChange: () => {} };
 
   private palette(): ThemePalette {
     const effectiveMode: ThemeMode =
@@ -58,7 +63,7 @@ export struct ThemePickerComponent {
           .borderRadius(14)
           .border({ width: 1, color: this.isSelected(option.mode) ? this.palette().accent : this.palette().border })
           .onClick(() => {
-            this.onThemeChange(option.mode);
+            this.handlers.onThemeChange(option.mode);
           });
         }, (option: ThemeOption) => option.mode);
       }
