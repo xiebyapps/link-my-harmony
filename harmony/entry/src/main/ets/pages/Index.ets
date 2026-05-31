@@ -53,6 +53,7 @@ import { SearchPanelComponent, type SearchPanelCallbacks } from '../components/S
 import { EditLinkOverlayComponent, type EditLinkOverlayCallbacks } from '../components/EditLinkOverlayComponent';
 import { AddLinkOverlayComponent, type AddLinkOverlayCallbacks } from '../components/AddLinkOverlayComponent';
 import { ElementsPanelComponent, type ElementsPanelCallbacks } from '../components/ElementsPanelComponent';
+import { CollectionOverlayComponent, type CollectionOverlayCallbacks, CollectionPickerOverlayComponent, type CollectionPickerOverlayCallbacks } from '../components/CollectionModalsComponent';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
@@ -335,11 +336,31 @@ struct Index {
       }
 
       if (this.activeModal === 'collection') {
-        this.CollectionOverlay();
+        CollectionOverlayComponent({
+          visible: this.activeModal === 'collection',
+          saving: this.collectionSaving,
+          name: this.newCollectionName,
+          description: this.newCollectionDescription,
+          color: this.newCollectionColor,
+          parentQuery: this.newCollectionParentQuery,
+          collections: this.collections,
+          themeMode: this.themeMode,
+          deviceDarkMode: this.deviceDarkMode,
+          callbacks: this.collectionOverlayCallbacks(),
+        });
       }
 
       if (this.activeModal === 'collection-picker') {
-        this.CollectionPickerOverlay();
+        CollectionPickerOverlayComponent({
+          visible: this.activeModal === 'collection-picker',
+          query: this.collectionPickerQuery,
+          collections: this.collections,
+          selectedId: this.selectedCollectionPickerId(),
+          createButtonText: this.collectionCreateButtonText(),
+          themeMode: this.themeMode,
+          deviceDarkMode: this.deviceDarkMode,
+          callbacks: this.collectionPickerCallbacks(),
+        });
       }
     }
     .width('100%')
@@ -686,257 +707,6 @@ struct Index {
 
 
 
-  @Builder
-  private CollectionOverlay() {
-    Stack({ alignContent: Alignment.Bottom }) {
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor('#66000000')
-        .onClick(() => {
-          this.closeCurrentModal();
-        });
-
-      Column({ space: 12 }) {
-        Row() {
-          Column({ space: 4 }) {
-            Text('Create Collection')
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.primaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start);
-
-            Text('Create it here and return to the link form.')
-              .fontSize(12)
-              .fontColor(this.secondaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start);
-          }
-          .layoutWeight(1)
-          .alignItems(HorizontalAlign.Start);
-
-          Button('Back')
-            .backgroundColor(this.cardColor())
-            .fontColor(this.primaryTextColor())
-            .borderRadius(999)
-            .onClick(() => {
-              this.closeCurrentModal();
-            });
-        }
-        .width('100%')
-        .alignItems(VerticalAlign.Center);
-
-        Column({ space: 10 }) {
-          TextInput({ placeholder: 'Name', text: this.newCollectionName })
-            .onChange((value: string) => {
-              this.newCollectionName = value;
-            })
-            .width('100%');
-
-          TextInput({ placeholder: 'Description (optional)', text: this.newCollectionDescription })
-            .onChange((value: string) => {
-              this.newCollectionDescription = value;
-            })
-            .height(88)
-            .width('100%');
-
-          TextInput({ placeholder: 'Parent collection (optional)', text: this.newCollectionParentQuery })
-            .onChange((value: string) => {
-              this.newCollectionParentQuery = value;
-            })
-            .width('100%');
-
-          if (this.newCollectionParentQuery.trim().length > 0) {
-            Text(this.detectedParentCollectionSummaryText())
-              .fontSize(12)
-              .fontColor(this.matchedParentCollection() !== null ? this.secondaryTextColor() : this.dangerColor())
-              .width('100%')
-              .textAlign(TextAlign.Start);
-          }
-
-          Row({ space: 8 }) {
-            this.ColorChip('#2563eb');
-            this.ColorChip('#0f766e');
-            this.ColorChip('#dc2626');
-            this.ColorChip('#7c3aed');
-            this.ColorChip('#f59e0b');
-          }
-          .width('100%');
-
-          Text(`Color: ${this.newCollectionColor}`)
-            .fontSize(12)
-            .fontColor(this.secondaryTextColor())
-            .width('100%')
-            .textAlign(TextAlign.Start);
-        }
-        .padding(14)
-        .backgroundColor(this.cardColor())
-        .borderRadius(14)
-        .width('100%');
-
-        Row({ space: 8 }) {
-          Button('Reset')
-            .layoutWeight(1)
-            .backgroundColor(this.cardColor())
-            .fontColor(this.primaryTextColor())
-            .borderRadius(12)
-            .onClick(() => {
-              this.resetCollectionDraft();
-            });
-
-          Button(this.collectionSaving ? 'Creating...' : 'Create')
-            .layoutWeight(1)
-            .backgroundColor(this.tabActiveColor())
-            .fontColor(this.tabActiveTextColor())
-            .borderRadius(12)
-            .enabled(!this.collectionSaving)
-            .onClick(() => {
-              this.handleCreateCollection();
-            });
-        }
-        .width('100%');
-      }
-      .onClick(() => {})
-      .width('100%')
-      .padding(12)
-      .backgroundColor(this.surfaceColor())
-      .borderRadius({ topLeft: 20, topRight: 20 })
-      .constraintSize({ maxHeight: '80%' });
-    }
-    .width('100%')
-    .height('100%');
-  }
-
-  @Builder
-  private CollectionPickerOverlay() {
-    Stack({ alignContent: Alignment.Bottom }) {
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor('#66000000')
-        .onClick(() => {
-          this.closeCurrentModal();
-        });
-
-      Column({ space: 12 }) {
-        Row() {
-          Column({ space: 4 }) {
-            Text('Choose Collection')
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.primaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start);
-
-            Text('Search existing collections or create a new one.')
-              .fontSize(12)
-              .fontColor(this.secondaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start);
-          }
-          .layoutWeight(1)
-          .alignItems(HorizontalAlign.Start);
-
-          Button('Back')
-            .backgroundColor(this.cardColor())
-            .fontColor(this.primaryTextColor())
-            .borderRadius(999)
-            .onClick(() => {
-              this.closeCurrentModal();
-            });
-        }
-        .width('100%')
-        .alignItems(VerticalAlign.Center);
-
-        TextInput({ placeholder: 'Search collections', text: this.collectionPickerQuery })
-          .onChange((value: string) => {
-            this.collectionPickerQuery = value;
-          })
-          .width('100%');
-
-        Row({ space: 8 }) {
-          Button('Unorganized')
-            .layoutWeight(1)
-            .backgroundColor(this.selectedCollectionPickerId() === 0 ? this.tabActiveColor() : this.cardColor())
-            .fontColor(this.selectedCollectionPickerId() === 0 ? this.tabActiveTextColor() : this.primaryTextColor())
-            .borderRadius(12)
-            .onClick(() => {
-              this.selectCollectionFromPicker(null);
-            });
-
-          Button(this.collectionCreateButtonText())
-            .layoutWeight(1)
-            .backgroundColor(this.cardColor())
-            .fontColor(this.primaryTextColor())
-            .borderRadius(12)
-            .onClick(() => {
-              this.openCollectionCreateFromPicker();
-            });
-        }
-        .width('100%');
-
-        Scroll() {
-          Column({ space: 8 }) {
-            ForEach(this.filteredCollectionsForPicker(), (item: CollectionItem) => {
-              Row({ space: 10 }) {
-                Column({ space: 4 }) {
-                  Text(item.name)
-                    .fontSize(15)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(this.primaryTextColor())
-                    .width('100%')
-                    .textAlign(TextAlign.Start);
-
-                  Text(this.collectionPickerItemHint(item))
-                    .fontSize(12)
-                    .fontColor(this.secondaryTextColor())
-                    .width('100%')
-                    .textAlign(TextAlign.Start);
-                }
-                .layoutWeight(1)
-                .alignItems(HorizontalAlign.Start);
-
-                if (this.selectedCollectionPickerId() === item.id) {
-                  Text('Selected')
-                    .fontSize(12)
-                    .fontColor(this.accentColor());
-                }
-              }
-              .padding({ left: 14, right: 14, top: 14, bottom: 14 })
-              .backgroundColor(this.selectedCollectionPickerId() === item.id ? this.surfaceColor() : this.cardColor())
-              .borderRadius(12)
-              .width('100%')
-              .onClick(() => {
-                this.selectCollectionFromPicker(item);
-              });
-            }, (item: CollectionItem) => `${item.id}`);
-
-            if (this.filteredCollectionsForPicker().length === 0) {
-              Text('No collections match the current search.')
-                .fontSize(12)
-                .fontColor(this.secondaryTextColor())
-                .width('100%')
-                .textAlign(TextAlign.Start)
-                .padding(12);
-            }
-          }
-          .width('100%');
-        }
-        .width('100%')
-        .scrollBar(BarState.Off)
-        .constraintSize({ maxHeight: '58%' });
-      }
-      .onClick(() => {})
-      .width('100%')
-      .padding(12)
-      .backgroundColor(this.surfaceColor())
-      .borderRadius({ topLeft: 20, topRight: 20 })
-      .constraintSize({ maxHeight: '85%' });
-    }
-    .width('100%')
-    .height('100%');
-  }
 
 
 
@@ -959,18 +729,6 @@ struct Index {
       .textAlign(TextAlign.Start);
   }
 
-  @Builder
-  private ColorChip(color: string) {
-    Button('')
-      .width(28)
-      .height(28)
-      .backgroundColor(color)
-      .borderRadius(14)
-      .border({ width: this.newCollectionColor === color ? 2 : 0, color: this.primaryTextColor() })
-      .onClick(() => {
-        this.newCollectionColor = color;
-      });
-  }
 
   private mergeTagsFromLinks(links: Array<LinkItem>): void {
     const existingKeys = new Set(this.knownTagNames.map((t) => t.toLowerCase()));
@@ -1708,6 +1466,27 @@ struct Index {
 
   private isThemeOptionSelected(mode: ThemeMode): boolean {
     return this.themeMode === mode;
+  }
+
+  private collectionOverlayCallbacks(): CollectionOverlayCallbacks {
+    return {
+      onClose: () => this.closeCurrentModal(),
+      onCreate: () => this.handleCreateCollection(),
+      onReset: () => this.resetCollectionDraft(),
+      onNameChange: (v: string) => { this.newCollectionName = v; },
+      onDescriptionChange: (v: string) => { this.newCollectionDescription = v; },
+      onParentQueryChange: (v: string) => { this.newCollectionParentQuery = v; },
+      onColorChange: (c: string) => { this.newCollectionColor = c; },
+    };
+  }
+
+  private collectionPickerCallbacks(): CollectionPickerOverlayCallbacks {
+    return {
+      onClose: () => this.closeCurrentModal(),
+      onSelect: (collection: CollectionItem | null) => this.selectCollectionFromPicker(collection),
+      onCreateNew: () => this.openCollectionCreateFromPicker(),
+      onQueryChange: (v: string) => { this.collectionPickerQuery = v; },
+    };
   }
 
   private elementsCallbacks(): ElementsPanelCallbacks {
