@@ -2780,11 +2780,30 @@ struct Index {
   }
 
   private formatError(error: Object): string {
-    if (error instanceof Error) {
-      return error.message;
+    if (!(error instanceof Error)) {
+      return `${error}`;
     }
 
-    return `${error}`;
+    const msg = error.message;
+
+    // HTTP errors: HTTP_401:..., HTTP_404:..., etc.
+    if (msg.startsWith('HTTP_')) {
+      const code = msg.substring(5, 8);
+      if (code === '401') return 'Authentication failed — please sign in again.';
+      if (code === '403') return 'Access denied.';
+      if (code === '404') return 'Resource not found.';
+      if (code === '409') return 'Conflict — resource already exists.';
+      if (code === '422') return 'Invalid data sent to server.';
+      if (code === '429') return 'Too many requests — please wait.';
+      if (code.startsWith('5')) return 'Server error — please try later.';
+      return `Server returned ${code}.`;
+    }
+
+    // Network errors
+    if (msg.startsWith('REQUEST_')) return 'Network error — check your connection.';
+    if (msg.indexOf('Timeout') >= 0) return 'Request timed out.';
+
+    return msg;
   }
 
   private startSharePolling(): void {
