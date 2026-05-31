@@ -252,9 +252,15 @@ struct Index {
         Column() {
           Column({ space: 6 }) {
             if (this.mainView === 'dashboard') {
-              if (this.quickMenuOpen) {
+              Column() {
                 this.QuickMenuDropdown();
               }
+              .scale({ x: this.quickMenuOpen ? 1 : 0.85, y: this.quickMenuOpen ? 1 : 0.85 })
+              .opacity(this.quickMenuOpen ? 1 : 0)
+              .animation({
+                duration: 120,
+                curve: Curve.FastOutSlowIn,
+              });
               this.QuickMenuButton();
             } else {
               this.HomeButton();
@@ -272,13 +278,17 @@ struct Index {
         .animation({ duration: 200 });
       }
 
-      if (this.notice.length > 0) {
-        Column() {
-          this.NoticeToast();
-        }
-        .margin({ bottom: 20 })
-        .align(Alignment.Bottom);
+      Column() {
+        this.NoticeToast();
       }
+      .margin({ bottom: 20 })
+      .align(Alignment.Bottom)
+      .translate({ y: this.notice.length > 0 ? 0 : 30 })
+      .opacity(this.notice.length > 0 ? 1 : 0)
+      .animation({
+        duration: 150,
+        curve: Curve.FastOutSlowIn,
+      });
 
       if (this.activeModal === 'add') {
         this.AddLinkOverlay();
@@ -1805,6 +1815,8 @@ struct Index {
         .width('100%')
         .height('100%')
         .backgroundColor('#66000000')
+        .opacity(this.activeModal === 'add' ? 1 : 0)
+        .animation({ duration: 250, curve: Curve.EaseOut })
         .onClick(() => {
           this.closeCurrentModal();
         });
@@ -1858,7 +1870,9 @@ struct Index {
       .padding({ left: 16, right: 16 })
       .backgroundColor(this.surfaceColor())
       .borderRadius({ topLeft: 24, topRight: 24 })
-      .constraintSize({ maxHeight: '92%' });
+      .constraintSize({ maxHeight: '92%' })
+      .translate({ y: this.activeModal === 'add' ? 0 : 200 })
+      .animation({ duration: 200, curve: Curve.FastOutSlowIn });
     }
     .width('100%')
     .height('100%');
@@ -1924,7 +1938,9 @@ struct Index {
       .padding({ left: 16, right: 16 })
       .backgroundColor(this.surfaceColor())
       .borderRadius({ topLeft: 24, topRight: 24 })
-      .constraintSize({ maxHeight: '92%' });
+      .constraintSize({ maxHeight: '92%' })
+      .translate({ y: this.activeModal === 'edit' ? 0 : 200 })
+      .animation({ duration: 200, curve: Curve.FastOutSlowIn });
     }
     .width('100%')
     .height('100%');
