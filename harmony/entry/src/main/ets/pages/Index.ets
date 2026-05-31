@@ -69,6 +69,18 @@ interface ScoredCollectionPreview {
   score: number;
 }
 
+interface DebugCollectionDef {
+  name: string;
+  color: string;
+  desc: string;
+}
+
+interface DebugLinkDef {
+  url: string;
+  title: string;
+  coll: string;
+}
+
 @Entry
 @Component
 struct Index {
@@ -2864,13 +2876,32 @@ struct Index {
     }
 
     this.loading = true;
-    this.setNotice('Adding test bookmarks...', false);
+    this.setNotice('Creating test collections...', false);
 
     try {
-      const collections = [
-        'Development', 'Design', 'News', 'Reading List', 'Shopping',
-        'Travel', 'Recipes', 'Music', 'Gaming', 'Finance',
+      const collectionDefs: Array<DebugCollectionDef> = [
+        { name: 'Development', color: '#2563eb', desc: 'Programming resources' } as DebugCollectionDef,
+        { name: 'Design', color: '#7c3aed', desc: 'Design tools and inspiration' } as DebugCollectionDef,
+        { name: 'News', color: '#dc2626', desc: 'News aggregators' } as DebugCollectionDef,
+        { name: 'Reading List', color: '#0f766e', desc: 'Articles to read later' } as DebugCollectionDef,
+        { name: 'Shopping', color: '#f59e0b', desc: 'Shopping and deals' } as DebugCollectionDef,
+        { name: 'Travel', color: '#0ea5e9', desc: 'Travel planning' } as DebugCollectionDef,
+        { name: 'Recipes', color: '#16a34a', desc: 'Cooking recipes' } as DebugCollectionDef,
+        { name: 'Music', color: '#e11d48', desc: 'Music and streaming' } as DebugCollectionDef,
+        { name: 'Gaming', color: '#9333ea', desc: 'Gaming resources' } as DebugCollectionDef,
+        { name: 'Finance', color: '#ca8a04', desc: 'Financial tools' } as DebugCollectionDef,
       ];
+
+      // Create collections and remember their IDs
+      const collMap = new Map<string, number>();
+      for (const def of collectionDefs) {
+        const coll = await this.service.createCollection(def.name, {
+          description: def.desc,
+          color: def.color,
+        });
+        collMap.set(def.name, coll.id);
+      }
+
       const tags = [
         'javascript', 'typescript', 'react', 'vue', 'python', 'rust', 'go',
         'figma', 'sketch', 'css', 'html', 'node', 'docker', 'kubernetes',
@@ -2878,46 +2909,64 @@ struct Index {
         'photography', 'music', 'gaming', 'fitness', 'health', 'science',
       ];
 
-      const urls = [
-        'https://developer.mozilla.org', 'https://react.dev', 'https://vuejs.org',
-        'https://www.typescriptlang.org', 'https://tailwindcss.com', 'https://vitejs.dev',
-        'https://nextjs.org', 'https://svelte.dev', 'https://astro.build',
-        'https://news.ycombinator.com', 'https://reddit.com', 'https://lobste.rs',
-        'https://github.com/trending', 'https://dev.to', 'https://medium.com',
-        'https://stackoverflow.com', 'https://npmjs.com', 'https://pypi.org',
-        'https://crates.io', 'https://docs.docker.com', 'https://kubernetes.io',
-        'https://figma.com', 'https://dribbble.com', 'https://behance.net',
-        'https://unsplash.com', 'https://pexels.com', 'https://canva.com',
-        'https://notion.so', 'https://obsidian.md', 'https://linear.app',
-        'https://vercel.com', 'https://netlify.com', 'https://railway.app',
+      const linkDefs: Array<DebugLinkDef> = [
+        { url: 'https://developer.mozilla.org', title: 'MDN Web Docs', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://react.dev', title: 'React Documentation', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://vuejs.org', title: 'Vue.js Guide', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://www.typescriptlang.org', title: 'TypeScript Handbook', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://tailwindcss.com', title: 'Tailwind CSS', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://vitejs.dev', title: 'Vite', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://nextjs.org', title: 'Next.js Framework', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://svelte.dev', title: 'Svelte', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://astro.build', title: 'Astro', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://news.ycombinator.com', title: 'Hacker News', coll: 'News' } as DebugLinkDef,
+        { url: 'https://reddit.com', title: 'Reddit', coll: 'News' } as DebugLinkDef,
+        { url: 'https://lobste.rs', title: 'Lobsters', coll: 'News' } as DebugLinkDef,
+        { url: 'https://github.com/trending', title: 'GitHub Trending', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://dev.to', title: 'DEV Community', coll: 'Reading List' } as DebugLinkDef,
+        { url: 'https://medium.com', title: 'Medium', coll: 'Reading List' } as DebugLinkDef,
+        { url: 'https://stackoverflow.com', title: 'Stack Overflow', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://npmjs.com', title: 'npm Registry', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://pypi.org', title: 'PyPI', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://crates.io', title: 'crates.io', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://docs.docker.com', title: 'Docker Docs', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://kubernetes.io', title: 'Kubernetes', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://figma.com', title: 'Figma', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://dribbble.com', title: 'Dribbble', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://behance.net', title: 'Behance', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://unsplash.com', title: 'Unsplash', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://pexels.com', title: 'Pexels', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://canva.com', title: 'Canva', coll: 'Design' } as DebugLinkDef,
+        { url: 'https://notion.so', title: 'Notion', coll: 'Reading List' } as DebugLinkDef,
+        { url: 'https://obsidian.md', title: 'Obsidian', coll: 'Reading List' } as DebugLinkDef,
+        { url: 'https://linear.app', title: 'Linear', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://vercel.com', title: 'Vercel', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://netlify.com', title: 'Netlify', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://railway.app', title: 'Railway', coll: 'Development' } as DebugLinkDef,
+        { url: 'https://spotify.com', title: 'Spotify', coll: 'Music' } as DebugLinkDef,
+        { url: 'https://soundcloud.com', title: 'SoundCloud', coll: 'Music' } as DebugLinkDef,
+        { url: 'https://booking.com', title: 'Booking.com', coll: 'Travel' } as DebugLinkDef,
+        { url: 'https://airbnb.com', title: 'Airbnb', coll: 'Travel' } as DebugLinkDef,
+        { url: 'https://allrecipes.com', title: 'AllRecipes', coll: 'Recipes' } as DebugLinkDef,
+        { url: 'https://epicurious.com', title: 'Epicurious', coll: 'Recipes' } as DebugLinkDef,
+        { url: 'https://steampowered.com', title: 'Steam', coll: 'Gaming' } as DebugLinkDef,
       ];
 
-      const titles = [
-        'MDN Web Docs', 'React Documentation', 'Vue.js Guide',
-        'TypeScript Handbook', 'Tailwind CSS', 'Vite',
-        'Next.js Framework', 'Svelte', 'Astro',
-        'Hacker News', 'Reddit', 'Lobsters',
-        'GitHub Trending', 'DEV Community', 'Medium',
-        'Stack Overflow', 'npm Registry', 'PyPI',
-        'crates.io', 'Docker Docs', 'Kubernetes',
-        'Figma', 'Dribbble', 'Behance',
-        'Unsplash', 'Pexels', 'Canva',
-        'Notion', 'Obsidian', 'Linear',
-        'Vercel', 'Netlify', 'Railway',
-      ];
+      this.setNotice(`Adding ${linkDefs.length} test bookmarks...`, false);
 
       let added = 0;
-      for (let i = 0; i < urls.length; i++) {
-        const collName = collections[i % collections.length];
+      for (let i = 0; i < linkDefs.length; i++) {
+        const def = linkDefs[i];
+        const collId = collMap.get(def.coll) ?? 0;
         const tagCount = 2 + (i % 4);
         const selectedTags: Array<string> = [];
         for (let t = 0; t < tagCount; t++) {
           selectedTags.push(tags[(i * 3 + t) % tags.length]);
         }
 
-        await this.service.addLink(urls[i], titles[i], {
+        await this.service.addLink(def.url, def.title, {
           tagNames: selectedTags,
-          collection: { id: 0, ownerId: 0, name: collName, description: '', color: '', parentId: 0, parentName: '', linkCount: 0 },
+          collection: { id: collId, ownerId: 0, name: def.coll, description: '', color: '', parentId: 0, parentName: '', linkCount: 0 },
         });
         added++;
       }
@@ -2925,7 +2974,7 @@ struct Index {
       await this.refreshLinks(true);
       await this.refreshDashboard();
       await this.refreshLocalCounts();
-      this.setNotice(`Added ${added} test bookmarks.`, false);
+      this.setNotice(`Added ${added} bookmarks in ${collectionDefs.length} collections.`, false);
     } catch (error) {
       this.setNotice(`Failed to add test data: ${this.formatError(error)}`, true);
     } finally {
@@ -2940,7 +2989,7 @@ struct Index {
     }
 
     this.loading = true;
-    this.setNotice('Removing test bookmarks...', false);
+    this.setNotice('Removing test data...', false);
 
     try {
       const testUrls = [
@@ -2955,21 +3004,49 @@ struct Index {
         'https://unsplash.com', 'https://pexels.com', 'https://canva.com',
         'https://notion.so', 'https://obsidian.md', 'https://linear.app',
         'https://vercel.com', 'https://netlify.com', 'https://railway.app',
+        'https://spotify.com', 'https://soundcloud.com',
+        'https://booking.com', 'https://airbnb.com',
+        'https://allrecipes.com', 'https://epicurious.com',
+        'https://steampowered.com',
       ];
 
+      const testCollections = [
+        'Development', 'Design', 'News', 'Reading List', 'Shopping',
+        'Travel', 'Recipes', 'Music', 'Gaming', 'Finance',
+      ];
+
+      // Delete test links
       let removed = 0;
-      const allLinks = await this.service.fetchLinks(0, '', 0, false);
-      for (const link of allLinks.links) {
-        if (testUrls.indexOf(link.url) >= 0) {
-          await this.service.deleteLink(link.id);
-          removed++;
+      let cursor = 0;
+      do {
+        const page = await this.service.fetchLinks(cursor, '', 0, false);
+        for (const link of page.links) {
+          if (testUrls.indexOf(link.url) >= 0) {
+            await this.service.deleteLink(link.id);
+            removed++;
+          }
+        }
+        cursor = page.nextCursor;
+      } while (cursor > 0);
+
+      // Delete test collections
+      let removedColls = 0;
+      const allColls = await this.service.fetchCollections();
+      for (const coll of allColls) {
+        if (testCollections.indexOf(coll.name) >= 0 && coll.linkCount === 0) {
+          try {
+            await this.service.localDatabase().deleteCollection(coll.id);
+            removedColls++;
+          } catch (_) {
+            // Skip if collection still has links
+          }
         }
       }
 
       await this.refreshLinks(true);
       await this.refreshDashboard();
       await this.refreshLocalCounts();
-      this.setNotice(`Removed ${removed} test bookmarks.`, false);
+      this.setNotice(`Removed ${removed} bookmarks, ${removedColls} collections.`, false);
     } catch (error) {
       this.setNotice(`Failed to remove test data: ${this.formatError(error)}`, true);
     } finally {
