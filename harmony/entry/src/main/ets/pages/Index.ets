@@ -402,28 +402,34 @@ struct Index {
         .padding({ right: this.mainView === 'dashboard' ? 60 : 90 });
       }
       .width('100%')
-      .padding({ left: 12, right: 12, bottom: 8 });
+      .padding({ left: 16, right: 16, bottom: 12 });
 
       if (this.mainView === 'dashboard') {
-        Refresh({ refreshing: $$this.dashboardRefreshing }) {
-          Scroll() {
-            Column({ space: 10 }) {
-              this.DashboardPanel();
+        Column() {
+          Refresh({ refreshing: $$this.dashboardRefreshing }) {
+            Scroll() {
+              Column({ space: 10 }) {
+                this.DashboardPanel();
+              }
+              .padding({ left: 12, right: 12, top: 12, bottom: 24 })
+              .width('100%');
             }
-            .padding({ left: 10, right: 10, top: 10, bottom: 20 })
-            .width('100%');
+            .width('100%')
+            .height('100%')
+            .scrollBar(BarState.Off);
           }
+          .layoutWeight(1)
           .width('100%')
-          .height('100%')
-          .scrollBar(BarState.Off);
+          .onStateChange((state: RefreshStatus) => {
+            if (state === RefreshStatus.Refresh) {
+              this.handleDashboardPullRefresh();
+            }
+          });
         }
         .layoutWeight(1)
         .width('100%')
-        .onStateChange((state: RefreshStatus) => {
-          if (state === RefreshStatus.Refresh) {
-            this.handleDashboardPullRefresh();
-          }
-        });
+        .backgroundColor(this.surfaceColor())
+        .borderRadius(18);
       } else {
         Column() {
           if (this.mainView === 'elements') {
@@ -435,13 +441,15 @@ struct Index {
           }
         }
         .layoutWeight(1)
-        .padding(10)
+        .padding(12)
         .width('100%')
         .justifyContent(FlexAlign.Start)
-        .alignItems(HorizontalAlign.Start);
+        .alignItems(HorizontalAlign.Start)
+        .backgroundColor(this.surfaceColor())
+        .borderRadius(18);
       }
     }
-    .padding({ left: 6, right: 6, top: this.safeAreaTop + 6, bottom: 6 })
+    .padding({ left: 12, right: 12, top: this.safeAreaTop + 12, bottom: 12 })
     .width('100%')
     .height('100%');
   }
@@ -2194,23 +2202,160 @@ struct Index {
   @Builder
   private SettingsPanel() {
     Scroll() {
-      Column({ space: 8 }) {
-
-        // 统计卡片
-        Row({ space: 6 }) {
-          this.StatTile(this.themeModeLabel(), $r('app.string.label_theme'));
-          this.StatTile(this.formatCount(this.linksTotal), $r('app.string.tab_links'));
-          this.StatTile(this.formatCount(this.tagsTotal), $r('app.string.tab_tags'));
-          this.StatTile(this.formatCount(this.pinnedTotal), 'Pinned');
+      Column({ space: 14 }) {
+        Column({ space: 6 }) {
+          this.SectionTitle($r('app.string.nav_menu'));
+          this.SectionSubtitle($r('app.string.subtitle_menu'));
         }
+        .padding(18)
+        .backgroundColor(this.cardColor())
+        .borderRadius(18)
+        .border({ width: 1, color: this.panelBorderColor() })
         .width('100%');
 
-        // 服务器
-        Column({ space: 8 }) {
-          Text($r('app.string.label_server'))
-            .fontSize(13)
+        Column({ space: 12 }) {
+          Column({ space: 4 }) {
+            Text($r('app.string.label_linkwarden'))
+              .fontSize(20)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(this.primaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Text(this.instance)
+              .fontSize(12)
+              .fontColor(this.secondaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start)
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis });
+          }
+          .width('100%')
+          .alignItems(HorizontalAlign.Start);
+
+          Row({ space: 8 }) {
+            Column({ space: 2 }) {
+              Text(this.themeModeLabel())
+                .fontSize(14)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(this.primaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+              Text($r('app.string.label_theme'))
+                .fontSize(10)
+                .fontColor(this.secondaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+            }
+            .layoutWeight(1)
+            .padding({ left: 12, right: 12, top: 10, bottom: 10 })
+            .backgroundColor(this.inputBackgroundColor())
+            .borderRadius(14)
+            .border({ width: 1, color: this.panelBorderColor() });
+
+            Column({ space: 2 }) {
+              Text(this.formatCount(this.linksTotal))
+                .fontSize(14)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(this.primaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+              Text($r('app.string.tab_links'))
+                .fontSize(10)
+                .fontColor(this.secondaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+            }
+            .layoutWeight(1)
+            .padding({ left: 12, right: 12, top: 10, bottom: 10 })
+            .backgroundColor(this.inputBackgroundColor())
+            .borderRadius(14)
+            .border({ width: 1, color: this.panelBorderColor() });
+          }
+          .width('100%');
+
+          Row({ space: 8 }) {
+            Column({ space: 2 }) {
+              Text(this.formatCount(this.tagsTotal))
+                .fontSize(14)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(this.primaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+              Text($r('app.string.tab_tags'))
+                .fontSize(10)
+                .fontColor(this.secondaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+            }
+            .layoutWeight(1)
+            .padding({ left: 12, right: 12, top: 10, bottom: 10 })
+            .backgroundColor(this.inputBackgroundColor())
+            .borderRadius(14)
+            .border({ width: 1, color: this.panelBorderColor() });
+
+            Column({ space: 2 }) {
+              Text(this.formatCount(this.pinnedTotal))
+                .fontSize(14)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(this.primaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+              Text('Pinned')
+                .fontSize(10)
+                .fontColor(this.secondaryTextColor())
+                .textAlign(TextAlign.Center)
+                .width('100%')
+                .maxLines(1);
+            }
+            .layoutWeight(1)
+            .padding({ left: 12, right: 12, top: 10, bottom: 10 })
+            .backgroundColor(this.inputBackgroundColor())
+            .borderRadius(14)
+            .border({ width: 1, color: this.panelBorderColor() });
+          }
+          .width('100%');
+        }
+        .padding(18)
+        .backgroundColor(this.cardColor())
+        .borderRadius(18)
+        .border({ width: 1, color: this.panelBorderColor() })
+        .width('100%');
+
+        Column({ space: 10 }) {
+          Text($r('app.string.label_appearance'))
+            .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
+            .width('100%')
+            .textAlign(TextAlign.Start);
+
+          this.ThemePicker();
+        }
+        .padding(18)
+        .backgroundColor(this.cardColor())
+        .borderRadius(18)
+        .border({ width: 1, color: this.panelBorderColor() })
+        .width('100%');
+
+        Column({ space: 10 }) {
+          Text($r('app.string.label_server'))
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.primaryTextColor())
+            .width('100%')
+            .textAlign(TextAlign.Start);
+
+          Text($r('app.string.msg_server_desc'))
+            .fontSize(12)
+            .fontColor(this.secondaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
@@ -2220,164 +2365,261 @@ struct Index {
             })
             .backgroundColor(this.inputBackgroundColor())
             .fontColor(this.primaryTextColor())
-            .borderRadius(10)
+            .borderRadius(12)
             .width('100%');
 
           Button($r('app.string.btn_apply_server'))
             .width('100%')
-            .height(40)
+            .height(44)
             .backgroundColor(this.themePalette().accentSoft)
             .fontColor(this.accentColor())
-            .borderRadius(10)
+            .borderRadius(14)
             .border({ width: 1, color: this.accentColor() })
             .onClick(() => {
               this.handleSaveSettings();
             });
         }
-        .padding(10)
+        .padding(18)
         .backgroundColor(this.cardColor())
-        .borderRadius(12)
+        .borderRadius(18)
         .border({ width: 1, color: this.panelBorderColor() })
         .width('100%');
 
-        // 外观
-        Column({ space: 8 }) {
-          Text($r('app.string.label_appearance'))
-            .fontSize(13)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(this.primaryTextColor())
-            .width('100%')
-            .textAlign(TextAlign.Start);
-
-          Row({ space: 6 }) {
-            ForEach(createThemeOptions(), (option: ThemeOption) => {
-              Button() {
-                Text(option.title)
-                  .fontSize(12)
-                  .fontWeight(this.isThemeOptionSelected(option.mode) ? FontWeight.Medium : FontWeight.Regular)
-                  .fontColor(this.isThemeOptionSelected(option.mode) ? this.tabActiveTextColor() : this.primaryTextColor());
-              }
-              .layoutWeight(1)
-              .height(36)
-              .backgroundColor(this.isThemeOptionSelected(option.mode) ? this.tabActiveColor() : this.inputBackgroundColor())
-              .borderRadius(10)
-              .border({ width: 1, color: this.isThemeOptionSelected(option.mode) ? this.tabActiveColor() : this.panelBorderColor() })
-              .onClick(() => {
-                this.themeMode = option.mode;
-                this.persistSessionState();
-              });
-            }, (option: ThemeOption) => option.mode);
-          }
-          .width('100%');
-        }
-        .padding(10)
-        .backgroundColor(this.cardColor())
-        .borderRadius(12)
-        .border({ width: 1, color: this.panelBorderColor() })
-        .width('100%');
-
-        // 本地数据
-        Column({ space: 8 }) {
+        Column({ space: 10 }) {
           Text($r('app.string.label_local_data'))
-            .fontSize(13)
+            .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Text(`${this.localLinkCount} ${$r('app.string.msg_links_count')}, ${this.localCollectionCount} ${$r('app.string.msg_collections_count')}`)
+          Text(`${$r('app.string.msg_local_data_desc')}: ${this.localLinkCount} ${$r('app.string.msg_links_count')}, ${this.localCollectionCount} ${$r('app.string.msg_collections_count')}. Back up regularly — data is kept in the app sandbox and will be lost if you uninstall.`)
             .fontSize(12)
             .fontColor(this.secondaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Row({ space: 6 }) {
-            Button(this.exportingLocal ? '…' : $r('app.string.btn_copy_clipboard'))
+          Row({ space: 8 }) {
+            Button(this.exportingLocal ? $r('app.string.btn_export') + '…' : $r('app.string.btn_copy_clipboard'))
               .enabled(!this.exportingLocal)
               .layoutWeight(1)
-              .height(36)
-              .backgroundColor(this.inputBackgroundColor())
-              .fontColor(this.primaryTextColor())
-              .borderRadius(10)
-              .border({ width: 1, color: this.panelBorderColor() })
+              .height(44)
+              .backgroundColor(this.themePalette().accentSoft)
+              .fontColor(this.accentColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.accentColor() })
               .onClick(() => {
                 this.handleExportLocal();
               });
 
-            Button(this.exportingLocal ? '…' : $r('app.string.btn_export'))
+            Button(this.exportingLocal ? $r('app.string.btn_export') + '…' : $r('app.string.btn_export') + '…')
               .enabled(!this.exportingLocal)
               .layoutWeight(1)
-              .height(36)
-              .backgroundColor(this.inputBackgroundColor())
-              .fontColor(this.primaryTextColor())
-              .borderRadius(10)
-              .border({ width: 1, color: this.panelBorderColor() })
+              .height(44)
+              .backgroundColor(this.themePalette().accentSoft)
+              .fontColor(this.accentColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.accentColor() })
               .onClick(() => {
                 this.handleExportToFile();
-              });
-
-            Button(this.importingLocal ? '…' : $r('app.string.btn_import_merge'))
-              .enabled(!this.importingLocal)
-              .layoutWeight(1)
-              .height(36)
-              .backgroundColor(this.inputBackgroundColor())
-              .fontColor(this.primaryTextColor())
-              .borderRadius(10)
-              .border({ width: 1, color: this.panelBorderColor() })
-              .onClick(() => {
-                this.handleImportFromFile('merge');
               });
           }
           .width('100%');
 
-          if (this.clearingLocal || (this.localLinkCount + this.localCollectionCount) > 0) {
-            Button(this.clearingLocal ? 'Clearing…' : 'Clear local data')
-              .enabled(!this.clearingLocal)
-              .width('100%')
-              .height(36)
+          Text($r('app.string.btn_import_merge'))
+            .fontSize(12)
+            .fontColor(this.secondaryTextColor())
+            .width('100%')
+            .textAlign(TextAlign.Start);
+
+          Row({ space: 8 }) {
+            Button(this.importingLocal ? $r('app.string.btn_import_merge') + '…' : $r('app.string.btn_import_merge'))
+              .enabled(!this.importingLocal)
+              .layoutWeight(1)
+              .height(44)
+              .backgroundColor(this.themePalette().accentSoft)
+              .fontColor(this.accentColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.accentColor() })
+              .onClick(() => {
+                this.handleImportFromFile('merge');
+              });
+
+            Button(this.importingLocal ? $r('app.string.btn_import_replace') + '…' : $r('app.string.btn_import_replace'))
+              .enabled(!this.importingLocal)
+              .layoutWeight(1)
+              .height(44)
               .backgroundColor('transparent')
               .fontColor(this.dangerColor())
-              .borderRadius(10)
+              .borderRadius(14)
               .border({ width: 1, color: this.dangerColor() })
               .onClick(() => {
-                this.handleClearLocal();
+                this.handleImportFromFile('replace');
               });
           }
+          .width('100%');
+
+          TextArea({ placeholder: '{"format":"folio-backup",...}', text: this.importPayload })
+            .onChange((value: string) => {
+              this.importPayload = value;
+            })
+            .backgroundColor(this.inputBackgroundColor())
+            .fontColor(this.primaryTextColor())
+            .borderRadius(12)
+            .width('100%')
+            .height(120);
+
+          Row({ space: 8 }) {
+            Button(this.importingLocal ? 'Merging…' : 'Paste import (merge)')
+              .enabled(!this.importingLocal)
+              .layoutWeight(1)
+              .height(44)
+              .backgroundColor('transparent')
+              .fontColor(this.primaryTextColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.panelBorderColor() })
+              .onClick(() => {
+                this.handleImportLocal('merge');
+              });
+
+            Button(this.importingLocal ? 'Replacing…' : 'Paste import (replace)')
+              .enabled(!this.importingLocal)
+              .layoutWeight(1)
+              .height(44)
+              .backgroundColor('transparent')
+              .fontColor(this.dangerColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.dangerColor() })
+              .onClick(() => {
+                this.handleImportLocal('replace');
+              });
+          }
+          .width('100%');
+
+          Button(this.clearingLocal ? 'Clearing…' : 'Clear local data')
+            .enabled(!this.clearingLocal && this.localLinkCount + this.localCollectionCount > 0)
+            .width('100%')
+            .height(44)
+            .backgroundColor('transparent')
+            .fontColor(this.dangerColor())
+            .borderRadius(14)
+            .border({ width: 1, color: this.dangerColor() })
+            .onClick(() => {
+              this.handleClearLocal();
+            });
         }
-        .padding(10)
+        .padding(18)
         .backgroundColor(this.cardColor())
-        .borderRadius(12)
+        .borderRadius(18)
         .border({ width: 1, color: this.panelBorderColor() })
         .width('100%');
 
-        // 同步
-        if (this.sessionMode === 'online' && this.token.length > 0
-            && (this.localLinkCount + this.localCollectionCount) > 0) {
-          Column({ space: 8 }) {
-            Text('Sync local → Linkwarden')
-              .fontSize(13)
+        if (this.previewVisible) {
+          Column({ space: 10 }) {
+            Text('Import preview')
+              .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.primaryTextColor())
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Text(`${this.localLinkCount} bookmarks not on server yet.`)
+            Text(`This backup contains ${this.previewLinkCount} links, ${this.previewCollectionCount} collections, ${this.previewTagCount} tags.`)
+              .fontSize(12)
+              .fontColor(this.primaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Text(this.previewExportedAt.length > 0
+              ? `Exported ${this.previewExportedAt}`
+              : 'Exported date not recorded.')
               .fontSize(12)
               .fontColor(this.secondaryTextColor())
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Button(this.localSyncRunning ? 'Syncing…' : `Upload to ${this.instance}`)
+            Text(this.previewStrategy === 'replace'
+              ? 'Strategy: REPLACE — all current local data will be wiped before loading this backup.'
+              : 'Strategy: MERGE — existing rows are kept; duplicates (by name for collections, by URL + collection for links) are skipped.')
+              .fontSize(12)
+              .fontColor(this.previewStrategy === 'replace' ? this.dangerColor() : this.primaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Text(`Source: ${this.previewSource === 'file' ? 'picked file' : 'pasted text'}. Review the numbers before confirming.`)
+              .fontSize(12)
+              .fontColor(this.secondaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Row({ space: 8 }) {
+              Button(this.importingLocal ? 'Importing…' : 'Confirm import')
+                .enabled(!this.importingLocal)
+                .layoutWeight(1)
+                .height(44)
+                .backgroundColor(this.previewStrategy === 'replace' ? 'transparent' : this.themePalette().accentSoft)
+                .fontColor(this.previewStrategy === 'replace' ? this.dangerColor() : this.accentColor())
+                .borderRadius(14)
+                .border({ width: 1, color: this.previewStrategy === 'replace' ? this.dangerColor() : this.accentColor() })
+                .onClick(() => {
+                  this.handleConfirmPreview();
+                });
+
+              Button('Cancel')
+                .enabled(!this.importingLocal)
+                .layoutWeight(1)
+                .height(44)
+                .backgroundColor('transparent')
+                .fontColor(this.primaryTextColor())
+                .borderRadius(14)
+                .border({ width: 1, color: this.panelBorderColor() })
+                .onClick(() => {
+                  this.handleCancelPreview();
+                });
+            }
+            .width('100%');
+          }
+          .padding(18)
+          .backgroundColor(this.cardColor())
+          .borderRadius(18)
+          .border({ width: 1, color: this.accentColor() })
+          .width('100%');
+        }
+
+        if (this.sessionMode === 'online' && this.token.length > 0
+            && (this.localLinkCount + this.localCollectionCount) > 0) {
+          Column({ space: 10 }) {
+            Text('Sync local → Linkwarden')
+              .fontSize(14)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.primaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Text(`${this.localLinkCount} local bookmarks and ${this.localCollectionCount} collections are not on the server yet. Upload them once. Duplicates (same URL + collection) are skipped.`)
+              .fontSize(12)
+              .fontColor(this.secondaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Button(this.localSyncRunning ? 'Syncing…' : `Upload ${this.localLinkCount} bookmarks to ${this.instance}`)
               .enabled(!this.localSyncRunning)
               .width('100%')
-              .height(40)
+              .height(44)
               .backgroundColor(this.themePalette().accentSoft)
               .fontColor(this.accentColor())
-              .borderRadius(10)
+              .borderRadius(14)
               .border({ width: 1, color: this.accentColor() })
               .onClick(() => {
                 this.handleSyncLocalToServer();
               });
+
+            if (this.localSyncRunning && this.syncProgressText.length > 0) {
+              Text(this.syncProgressText)
+                .fontSize(12)
+                .fontColor(this.secondaryTextColor())
+                .width('100%')
+                .textAlign(TextAlign.Start);
+            }
 
             if (this.lastMergeHasResult) {
               Text(this.lastMergeSummary)
@@ -2385,118 +2627,157 @@ struct Index {
                 .fontColor(this.primaryTextColor())
                 .width('100%')
                 .textAlign(TextAlign.Start);
+
+              Text('Keep the local copy as archive (switch to offline mode to view), or clear it now?')
+                .fontSize(12)
+                .fontColor(this.secondaryTextColor())
+                .width('100%')
+                .textAlign(TextAlign.Start);
+
+              Row({ space: 8 }) {
+                Button('Keep as archive')
+                  .layoutWeight(1)
+                  .height(44)
+                  .backgroundColor(this.themePalette().accentSoft)
+                  .fontColor(this.accentColor())
+                  .borderRadius(14)
+                  .border({ width: 1, color: this.accentColor() })
+                  .onClick(() => {
+                    this.handleMergeArchiveKeep();
+                  });
+
+                Button(this.clearingLocal ? 'Clearing…' : 'Clear local')
+                  .enabled(!this.clearingLocal)
+                  .layoutWeight(1)
+                  .height(44)
+                  .backgroundColor('transparent')
+                  .fontColor(this.dangerColor())
+                  .borderRadius(14)
+                  .border({ width: 1, color: this.dangerColor() })
+                  .onClick(() => {
+                    this.handleMergeArchiveClear();
+                  });
+              }
+              .width('100%');
             }
           }
-          .padding(10)
+          .padding(18)
           .backgroundColor(this.cardColor())
-          .borderRadius(12)
+          .borderRadius(18)
           .border({ width: 1, color: this.panelBorderColor() })
           .width('100%');
         }
 
-        // 链接
-        Column({ space: 8 }) {
+        Column({ space: 10 }) {
           Text('Quick Links')
-            .fontSize(13)
+            .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Row({ space: 6 }) {
-            this.LinkTile('Linkwarden', () => {
+          Row({ space: 10 }) {
+            this.MenuActionTile('Website', 'Open product site', () => {
               this.openLinkInBrowser('https://linkwarden.app');
             });
-            this.LinkTile('GitHub', () => {
+            this.MenuActionTile('Repository', 'Open GitHub repo', () => {
               this.openLinkInBrowser('https://github.com/linkwarden/linkwarden');
             });
-            this.LinkTile('Source', () => {
+            this.MenuActionTile('Harmony Client', 'Open this repo', () => {
               this.openLinkInBrowser('https://github.com/xiebaiyuan/link-my-harmony');
             });
           }
           .width('100%');
         }
-        .padding(10)
+        .padding(18)
         .backgroundColor(this.cardColor())
-        .borderRadius(12)
+        .borderRadius(18)
         .border({ width: 1, color: this.panelBorderColor() })
         .width('100%');
 
-        // 会话
-        Column({ space: 8 }) {
+        Column({ space: 10 }) {
           Text('Session')
-            .fontSize(13)
+            .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
           if (this.sessionMode === 'offline') {
-            Text('Offline mode. Connect to sync across devices.')
+            Text('Not connected to a Linkwarden server. Sign in to keep bookmarks in sync across devices.')
               .fontSize(12)
               .fontColor(this.secondaryTextColor())
               .width('100%')
               .textAlign(TextAlign.Start);
 
-            Button(this.token.length > 0 ? 'Resume online' : 'Connect to Linkwarden')
-              .enabled(!this.loading)
-              .width('100%')
-              .height(40)
-              .backgroundColor(this.themePalette().accentSoft)
-              .fontColor(this.accentColor())
-              .borderRadius(10)
-              .border({ width: 1, color: this.accentColor() })
-              .onClick(() => {
-                this.token.length > 0 ? this.handleResumeOnline() : this.handleConnectToLinkwarden();
-              });
-          } else {
-            Text('Online. Switch to offline to work without server.')
-              .fontSize(12)
-              .fontColor(this.secondaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start);
-
-            Row({ space: 6 }) {
-              Button(this.loading ? '…' : 'Offline')
+            if (this.token.length > 0) {
+              Button(this.loading ? 'Resuming…' : 'Resume online mode')
                 .enabled(!this.loading)
-                .layoutWeight(1)
-                .height(36)
-                .backgroundColor(this.inputBackgroundColor())
-                .fontColor(this.primaryTextColor())
-                .borderRadius(10)
-                .border({ width: 1, color: this.panelBorderColor() })
+                .width('100%')
+                .height(44)
+                .backgroundColor(this.themePalette().accentSoft)
+                .fontColor(this.accentColor())
+                .borderRadius(14)
+                .border({ width: 1, color: this.accentColor() })
                 .onClick(() => {
-                  this.handleSwitchToOffline();
+                  this.handleResumeOnline();
                 });
-
-              Button(this.loading ? '…' : 'Sign Out')
-                .enabled(!this.loading)
-                .layoutWeight(1)
-                .height(36)
-                .backgroundColor('transparent')
-                .fontColor(this.dangerColor())
-                .borderRadius(10)
-                .border({ width: 1, color: this.dangerColor() })
+            } else {
+              Button('Connect to Linkwarden')
+                .width('100%')
+                .height(44)
+                .backgroundColor(this.themePalette().accentSoft)
+                .fontColor(this.accentColor())
+                .borderRadius(14)
+                .border({ width: 1, color: this.accentColor() })
                 .onClick(() => {
-                  this.handleSignOut();
+                  this.handleConnectToLinkwarden();
                 });
             }
-            .width('100%');
+          } else {
+            Text('Signed in to Linkwarden. Switch to offline mode to keep working on this device without the server.')
+              .fontSize(12)
+              .fontColor(this.secondaryTextColor())
+              .width('100%')
+              .textAlign(TextAlign.Start);
+
+            Button(this.loading ? 'Switching…' : 'Switch to offline (keep signed in)')
+              .enabled(!this.loading)
+              .width('100%')
+              .height(44)
+              .backgroundColor('transparent')
+              .fontColor(this.primaryTextColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.panelBorderColor() })
+              .onClick(() => {
+                this.handleSwitchToOffline();
+              });
+
+            Button('Sign Out')
+              .width('100%')
+              .height(44)
+              .backgroundColor('transparent')
+              .fontColor(this.dangerColor())
+              .borderRadius(14)
+              .border({ width: 1, color: this.dangerColor() })
+              .onClick(() => {
+                this.handleSignOut();
+              });
           }
         }
-        .padding(10)
+        .padding(18)
         .backgroundColor(this.cardColor())
-        .borderRadius(12)
+        .borderRadius(18)
         .border({ width: 1, color: this.panelBorderColor() })
         .width('100%');
 
         Text('HarmonyOS Native Client')
-          .fontSize(11)
-          .fontColor(this.textMutedColor())
+          .fontSize(12)
+          .fontColor(this.secondaryTextColor())
           .width('100%')
-          .textAlign(TextAlign.Center);
+          .textAlign(TextAlign.Start);
       }
-      .padding({ left: 6, right: 6, top: 6, bottom: 96 })
+      .padding({ left: 12, right: 12, top: 12, bottom: 108 })
       .width('100%');
     }
     .width('100%')
@@ -2504,44 +2785,6 @@ struct Index {
     .scrollBar(BarState.Off);
   }
 
-  @Builder
-  private StatTile(value: string, label: Resource | string) {
-    Column({ space: 2 }) {
-      Text(value)
-        .fontSize(14)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(this.primaryTextColor())
-        .textAlign(TextAlign.Center)
-        .width('100%')
-        .maxLines(1);
-      Text(label)
-        .fontSize(10)
-        .fontColor(this.secondaryTextColor())
-        .textAlign(TextAlign.Center)
-        .width('100%')
-        .maxLines(1);
-    }
-    .layoutWeight(1)
-    .padding({ top: 8, bottom: 8 })
-    .backgroundColor(this.cardColor())
-    .borderRadius(10)
-    .border({ width: 1, color: this.panelBorderColor() });
-  }
-
-  @Builder
-  private LinkTile(title: string, onClick: () => void) {
-    Button(title)
-      .layoutWeight(1)
-      .height(36)
-      .fontSize(12)
-      .backgroundColor(this.inputBackgroundColor())
-      .fontColor(this.primaryTextColor())
-      .borderRadius(10)
-      .border({ width: 1, color: this.panelBorderColor() })
-      .onClick(() => {
-        onClick();
-      });
-  }
 
   @Builder
   private ThemePicker() {
@@ -3559,10 +3802,6 @@ struct Index {
 
   private secondaryTextColor(): string {
     return this.themePalette().textSecondary;
-  }
-
-  private textMutedColor(): string {
-    return this.themePalette().textMuted;
   }
 
   private accentColor(): string {
