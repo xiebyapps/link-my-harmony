@@ -52,6 +52,7 @@ import { DashboardPanelComponent, type DashboardPanelCallbacks, type CollectionP
 import { SearchPanelComponent, type SearchPanelCallbacks } from '../components/SearchPanelComponent';
 import { EditLinkOverlayComponent, type EditLinkOverlayCallbacks } from '../components/EditLinkOverlayComponent';
 import { AddLinkOverlayComponent, type AddLinkOverlayCallbacks } from '../components/AddLinkOverlayComponent';
+import { ElementsPanelComponent, type ElementsPanelCallbacks } from '../components/ElementsPanelComponent';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
@@ -490,7 +491,29 @@ struct Index {
       } else {
         Column() {
           if (this.mainView === 'elements') {
-            this.ElementsPanel();
+            ElementsPanelComponent({
+              currentTab: this.elementsView,
+              links: this.links,
+              collections: this.collections,
+              filteredCollections: this.filteredCollections(),
+              filteredTags: this.filteredTags(),
+              loading: this.loading,
+              loadingMore: this.loadingMore,
+              hasMore: this.hasMore,
+              showPinnedOnly: this.showPinnedOnly,
+              selectedCollectionFilterId: this.selectedCollectionFilterId,
+              activeCollectionName: this.activeCollectionName(),
+              searchQuery: this.searchQuery,
+              collectionSearchQuery: this.collectionSearchQuery,
+              tagSearchQuery: this.tagSearchQuery,
+              linksRefreshing: this.linksRefreshing,
+              collectionsRefreshing: this.collectionsRefreshing,
+              tagsRefreshing: this.tagsRefreshing,
+              tagUsageCount: (tag: string) => this.tagUsageCount(tag),
+              themeMode: this.themeMode,
+              deviceDarkMode: this.deviceDarkMode,
+              callbacks: this.elementsCallbacks(),
+            });
           } else if (this.mainView === 'search') {
             SearchPanelComponent({
               searchQuery: this.searchPageQuery,
@@ -661,566 +684,6 @@ struct Index {
     .margin({ bottom: 28 });
   }
 
-  @Builder
-  private ElementsPanel() {
-    Column({ space: 12 }) {
-      // Segmented control
-      Row() {
-        Text($r('app.string.tab_links'))
-          .layoutWeight(1)
-          .height(32)
-          .fontSize(13)
-          .fontWeight(this.elementsView === 'links' ? FontWeight.Bold : FontWeight.Regular)
-          .fontColor(this.elementsView === 'links' ? this.tabActiveTextColor() : this.secondaryTextColor())
-          .textAlign(TextAlign.Center)
-          .backgroundColor(this.elementsView === 'links' ? this.tabActiveColor() : Color.Transparent)
-          .borderRadius(8)
-          .onClick(() => {
-            this.elementsView = 'links';
-            this.refreshLinks(true);
-          });
-
-        Text($r('app.string.tab_collections'))
-          .layoutWeight(1)
-          .height(32)
-          .fontSize(13)
-          .fontWeight(this.elementsView === 'collections' ? FontWeight.Bold : FontWeight.Regular)
-          .fontColor(this.elementsView === 'collections' ? this.tabActiveTextColor() : this.secondaryTextColor())
-          .textAlign(TextAlign.Center)
-          .backgroundColor(this.elementsView === 'collections' ? this.tabActiveColor() : Color.Transparent)
-          .borderRadius(8)
-          .onClick(() => {
-            this.elementsView = 'collections';
-            this.refreshDashboard();
-          });
-
-        Text($r('app.string.tab_tags'))
-          .layoutWeight(1)
-          .height(32)
-          .fontSize(13)
-          .fontWeight(this.elementsView === 'tags' ? FontWeight.Bold : FontWeight.Regular)
-          .fontColor(this.elementsView === 'tags' ? this.tabActiveTextColor() : this.secondaryTextColor())
-          .textAlign(TextAlign.Center)
-          .backgroundColor(this.elementsView === 'tags' ? this.tabActiveColor() : Color.Transparent)
-          .borderRadius(8)
-          .onClick(() => {
-            this.elementsView = 'tags';
-          });
-      }
-      .width('100%')
-      .padding(4)
-      .backgroundColor(this.inputBackgroundColor())
-      .borderRadius(12);
-
-      if (this.elementsView === 'links') {
-        Column() {
-          this.LinksPanel();
-        }
-        .layoutWeight(1)
-        .width('100%');
-      } else if (this.elementsView === 'collections') {
-        Column() {
-          this.CollectionsPanel();
-        }
-        .layoutWeight(1)
-        .width('100%');
-      } else {
-        Column() {
-          this.TagsPanel();
-        }
-        .layoutWeight(1)
-        .width('100%');
-      }
-    }
-    .height('100%')
-    .width('100%')
-    .justifyContent(FlexAlign.Start)
-    .alignItems(HorizontalAlign.Start);
-  }
-
-  @Builder
-  private LinksPanel() {
-    Column({ space: 10 }) {
-      // Header row: count + add button
-      Row({ space: 8 }) {
-        Text(`${this.links.length} links`)
-          .fontSize(12)
-          .fontColor(this.secondaryTextColor())
-          .layoutWeight(1)
-          .textAlign(TextAlign.Start);
-
-        this.InlineActionButton('＋', () => {
-          this.openAddModal();
-        });
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-      .alignItems(VerticalAlign.Center);
-
-      // Filter chip + search
-      Row({ space: 8 }) {
-        Text(this.showPinnedOnly ? '📌 Pinned' : '≡ All')
-          .fontSize(12)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.showPinnedOnly ? this.tabActiveTextColor() : this.secondaryTextColor())
-          .padding({ left: 12, right: 12 })
-          .height(36)
-          .backgroundColor(this.showPinnedOnly ? this.tabActiveColor() : this.inputBackgroundColor())
-          .borderRadius(999)
-          .onClick(() => {
-            this.selectedCollectionFilterId = 0;
-            this.showPinnedOnly = !this.showPinnedOnly;
-            this.refreshLinks(true);
-          });
-
-        TextInput({ placeholder: '🔍  Search links', text: this.searchQuery })
-          .onChange((value: string) => {
-            this.searchQuery = value;
-            this.refreshLinks(true);
-          })
-          .backgroundColor(this.inputBackgroundColor())
-          .fontColor(this.primaryTextColor())
-          .borderRadius(12)
-          .height(36)
-          .layoutWeight(1);
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center);
-
-      if (this.selectedCollectionFilterId > 0) {
-        Row({ space: 6 }) {
-          Text('🗂')
-            .fontSize(12);
-          Text(this.activeCollectionName())
-            .fontSize(12)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(this.tabActiveTextColor())
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .layoutWeight(1);
-          Text('✕')
-            .fontSize(12)
-            .fontColor(this.tabActiveTextColor())
-            .onClick(() => {
-              this.selectedCollectionFilterId = 0;
-              this.refreshLinks(true);
-            });
-        }
-        .width('100%')
-        .padding({ left: 12, right: 12 })
-        .height(32)
-        .backgroundColor(this.tabActiveColor())
-        .borderRadius(999)
-        .alignItems(VerticalAlign.Center);
-      }
-
-      if (this.links.length === 0) {
-        Text(this.loading ? 'Loading links…' : 'No links yet.')
-          .fontSize(13)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Center)
-          .padding({ top: 24, bottom: 8 });
-      }
-
-      Refresh({ refreshing: $$this.linksRefreshing }) {
-        List({ space: 8 }) {
-          ForEach(this.links, (item: LinkItem) => {
-            ListItem() {
-              this.LinkCard(item);
-            };
-          }, (item: LinkItem) => `${item.id}-${item.url}`)
-        }
-        .divider({ strokeWidth: 0 })
-        .width('100%')
-        .height('100%')
-        .onReachEnd(() => {
-          if (this.hasMore && !this.loadingMore && !this.loading) {
-            this.refreshLinks(false);
-          }
-        });
-      }
-      .layoutWeight(1)
-      .width('100%')
-      .onStateChange((state: RefreshStatus) => {
-        if (state === RefreshStatus.Refresh) {
-          this.handleLibraryLinksPullRefresh();
-        }
-      });
-
-      if (this.loadingMore) {
-        Text($r('app.string.msg_loading_more'))
-          .fontSize(12)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Center)
-          .padding({ top: 8, bottom: 8 });
-      } else if (!this.hasMore && this.links.length > 0) {
-        Text($r('app.string.msg_no_more_links'))
-          .fontSize(12)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Center)
-          .padding({ top: 8, bottom: 8 });
-      }
-    }
-    .height('100%')
-    .width('100%');
-  }
-
-  @Builder
-  private CollectionsPanel() {
-    Column({ space: 10 }) {
-      Row({ space: 8 }) {
-        this.SectionSubtitle(`${this.filteredCollections().length} collections`);
-      }
-      .width('100%');
-
-      TextInput({ placeholder: 'Search collections', text: this.collectionSearchQuery })
-        .onChange((value: string) => {
-          this.collectionSearchQuery = value;
-        })
-        .backgroundColor(this.inputBackgroundColor())
-        .fontColor(this.primaryTextColor())
-        .borderRadius(12)
-        .width('100%');
-
-      if (this.filteredCollections().length === 0) {
-        Text(this.collections.length === 0 ? 'No collections.' : 'No collections match this search.')
-          .fontSize(13)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start)
-          .padding({ top: 8, bottom: 8 });
-      }
-
-      Refresh({ refreshing: $$this.collectionsRefreshing }) {
-        List({ space: 8 }) {
-          ForEach(this.filteredCollections(), (collection: CollectionItem) => {
-            ListItem() {
-              this.CollectionRow(collection);
-            };
-          }, (collection: CollectionItem) => `collection-panel-${collection.id}`)
-        }
-        .divider({ strokeWidth: 0 })
-        .width('100%')
-        .height('100%');
-      }
-      .layoutWeight(1)
-      .width('100%')
-      .onStateChange((state: RefreshStatus) => {
-        if (state === RefreshStatus.Refresh) {
-          this.handleLibraryCollectionsPullRefresh();
-        }
-      });
-    }
-    .height('100%')
-    .width('100%');
-  }
-
-  @Builder
-  private TagsPanel() {
-    Refresh({ refreshing: $$this.tagsRefreshing }) {
-      Scroll() {
-        Column({ space: 8 }) {
-          this.SectionSubtitle(`${this.filteredTags().length} tags`);
-
-          TextInput({ placeholder: 'Search tags', text: this.tagSearchQuery })
-            .onChange((value: string) => {
-              this.tagSearchQuery = value;
-            })
-            .backgroundColor(this.inputBackgroundColor())
-            .fontColor(this.primaryTextColor())
-            .borderRadius(12)
-            .width('100%');
-
-          if (this.filteredTags().length === 0) {
-            Text($r('app.string.msg_no_tags'))
-              .fontSize(13)
-              .fontColor(this.secondaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start)
-              .padding({ top: 8, bottom: 8 });
-          } else {
-            ForEach(this.filteredTags(), (tag: string) => {
-              this.TagListRow(tag);
-            }, (tag: string) => `tag-${tag}`);
-          }
-        }
-        .justifyContent(FlexAlign.Start)
-        .alignItems(HorizontalAlign.Start)
-        .width('100%')
-        .padding({ bottom: 96 });
-      }
-      .width('100%')
-      .height('100%')
-      .scrollBar(BarState.Off);
-    }
-    .width('100%')
-    .height('100%')
-    .onStateChange((state: RefreshStatus) => {
-      if (state === RefreshStatus.Refresh) {
-        this.handleLibraryTagsPullRefresh();
-      }
-    });
-  }
-
-
-  @Builder
-  private TagListRow(tag: string) {
-    Row({ space: 0 }) {
-      Text('#')
-        .fontSize(15)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(this.accentColor())
-        .padding({ left: 14, right: 4 });
-
-      Text(tag)
-        .fontSize(14)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.primaryTextColor())
-        .layoutWeight(1)
-        .textAlign(TextAlign.Start)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis });
-
-      Text(`${this.tagUsageCount(tag)}`)
-        .fontSize(12)
-        .fontColor(this.secondaryTextColor())
-        .padding({ left: 8, right: 14, top: 12, bottom: 12 });
-    }
-    .width('100%')
-    .alignItems(VerticalAlign.Center)
-    .backgroundColor(this.cardColor())
-    .borderRadius(12)
-    .onClick(() => {
-      this.navigateToTag(tag);
-    });
-  }
-
-
-
-
-
-
-  @Builder
-  private StatCard(title: string, value: string, onClick: () => void) {
-    Column({ space: 4 }) {
-      Text(title)
-        .fontSize(12)
-        .fontColor(this.secondaryTextColor())
-        .width('100%')
-        .textAlign(TextAlign.Start);
-      Text(value)
-        .fontSize(20)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(this.primaryTextColor())
-        .width('100%')
-        .textAlign(TextAlign.Start);
-    }
-    .layoutWeight(1)
-    .padding(10)
-    .backgroundColor(this.cardColor())
-    .borderRadius(10)
-    .onClick(() => {
-      onClick();
-    });
-  }
-
-  @Builder
-  private InlineActionButton(symbol: string, onClick: () => void) {
-    Button() {
-      Text(symbol)
-        .fontSize(24)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(this.tabActiveTextColor())
-        .width('100%')
-        .textAlign(TextAlign.Center);
-    }
-    .width(40)
-    .height(40)
-    .backgroundColor(this.tabActiveColor())
-    .borderRadius(20)
-    .padding(0)
-    .onClick(() => {
-      onClick();
-    });
-  }
-
-  @Builder
-  private LinkCard(item: LinkItem) {
-    Column({ space: 0 }) {
-      // Title row
-      Row({ space: 8 }) {
-        Text(item.name.length > 0 ? item.name : item.url)
-          .fontSize(15)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(this.primaryTextColor())
-          .maxLines(2)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .layoutWeight(1)
-          .textAlign(TextAlign.Start);
-
-        if (item.pinned) {
-          Text('📌')
-            .fontSize(13);
-        }
-      }
-      .width('100%')
-      .padding({ bottom: 4 });
-
-      // URL
-      Text(item.url)
-        .fontSize(11)
-        .fontColor(this.secondaryTextColor())
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .width('100%')
-        .textAlign(TextAlign.Start)
-        .opacity(0.8);
-
-      // Description (if any)
-      if (item.description.length > 0) {
-        Text(item.description)
-          .fontSize(12)
-          .fontColor(this.secondaryTextColor())
-          .maxLines(2)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-          .textAlign(TextAlign.Start)
-          .padding({ top: 4 });
-      }
-
-      // Meta row: collection chip + date
-      Row({ space: 6 }) {
-        Text(item.collectionName.length > 0 ? item.collectionName : 'Unorganized')
-          .fontSize(11)
-          .fontColor(item.collectionColor.length > 0 ? item.collectionColor : this.accentColor())
-          .padding({ left: 8, right: 8, top: 3, bottom: 3 })
-          .backgroundColor(this.inputBackgroundColor())
-          .borderRadius(999)
-          .maxLines(1);
-
-        if (item.tags.length > 0) {
-          Text(item.tags.map((tag) => `#${tag.name}`).join(' '))
-            .fontSize(11)
-            .fontColor(this.secondaryTextColor())
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .layoutWeight(1);
-        } else {
-          Blank().layoutWeight(1);
-        }
-
-        if (item.createdAt.length > 0) {
-          Text(this.formatDateLabel(item.createdAt))
-            .fontSize(11)
-            .fontColor(this.secondaryTextColor())
-            .opacity(0.7);
-        }
-      }
-      .width('100%')
-      .padding({ top: 8 })
-      .alignItems(VerticalAlign.Center);
-    }
-    .padding({ left: 14, right: 14, top: 12, bottom: 12 })
-    .backgroundColor(
-      this.highlightedLinkId === item.id
-        ? this.newlyAddedCardColor()
-        : (this.selectedLink.id === item.id ? this.selectedCardColor() : this.cardColor())
-    )
-    .borderRadius(14)
-    .width('100%')
-    .onClick(() => {
-      this.highlightedLinkId = 0;
-      this.recordCollectionViewUsage(item.collectionId);
-      this.openLinkInBrowser(item.url);
-    })
-    .gesture(
-      LongPressGesture()
-        .onAction(() => {
-          this.highlightedLinkId = 0;
-          this.handleLinkLongPress(item);
-        })
-    );
-  }
-
-
-  @Builder
-  private CollectionMatchHints(query: string, matches: Array<CollectionItem>, onPick: (name: string) => void, summary: string) {
-    if (query.trim().length > 0) {
-      Text(summary)
-        .fontSize(12)
-        .fontColor(matches.length > 0 ? this.secondaryTextColor() : this.dangerColor())
-        .width('100%')
-        .textAlign(TextAlign.Start);
-
-      if (matches.length > 0) {
-        Row({ space: 8 }) {
-          ForEach(matches.slice(0, 3), (collection: CollectionItem) => {
-            Button(collection.name)
-              .backgroundColor(this.cardColor())
-              .fontColor(this.primaryTextColor())
-              .borderRadius(999)
-              .padding({ left: 10, right: 10, top: 2, bottom: 2 })
-              .onClick(() => {
-                onPick(collection.name);
-              });
-          }, (collection: CollectionItem) => `collection-match-${collection.id}`);
-        }
-        .width('100%');
-      }
-    }
-  }
-
-  @Builder
-  private CollectionRow(collection: CollectionItem) {
-    Row({ space: 0 }) {
-      // Name + description
-      Column({ space: 2 }) {
-        Text(collection.name.length > 0 ? collection.name : 'Untitled')
-          .fontSize(14)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.primaryTextColor())
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-          .textAlign(TextAlign.Start);
-
-        if (collection.parentName.length > 0 || collection.description.length > 0) {
-          Text(collection.parentName.length > 0 ? collection.parentName : collection.description)
-            .fontSize(11)
-            .fontColor(this.secondaryTextColor())
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .width('100%')
-            .textAlign(TextAlign.Start);
-        }
-      }
-      .layoutWeight(1)
-      .alignItems(HorizontalAlign.Start)
-      .padding({ left: 12, top: 10, bottom: 10 });
-
-      // Link count badge
-      Text(`${collection.linkCount}`)
-        .fontSize(12)
-        .fontColor(this.secondaryTextColor())
-        .padding({ left: 8, right: 12, top: 10, bottom: 10 });
-    }
-    .width('100%')
-    .backgroundColor(this.cardColor())
-    .borderRadius(12)
-    .border({
-      width: { left: 4 },
-      color: collection.color.length > 0 ? collection.color : this.accentColor(),
-      radius: 12,
-    })
-    .clip(true)
-    .alignItems(VerticalAlign.Center)
-    .onClick(() => {
-      this.navigateToCollection(collection.id);
-    });
-  }
 
 
   @Builder
@@ -2245,6 +1708,43 @@ struct Index {
 
   private isThemeOptionSelected(mode: ThemeMode): boolean {
     return this.themeMode === mode;
+  }
+
+  private elementsCallbacks(): ElementsPanelCallbacks {
+    return {
+      onTabChange: (tab: string) => { this.elementsView = tab as ElementsView; },
+      onRefreshLinks: () => this.refreshLinks(true),
+      onRefreshDashboard: () => this.refreshDashboard(),
+      onAddLink: () => this.openAddModal(),
+      onPinnedFilterToggle: () => {
+        this.selectedCollectionFilterId = 0;
+        this.showPinnedOnly = !this.showPinnedOnly;
+        this.refreshLinks(true);
+      },
+      onSearchQueryChange: (query: string) => {
+        this.searchQuery = query;
+        this.refreshLinks(true);
+      },
+      onCollectionFilterClear: () => {
+        this.selectedCollectionFilterId = 0;
+        this.refreshLinks(true);
+      },
+      onCollectionSearchChange: (query: string) => { this.collectionSearchQuery = query; },
+      onTagSearchChange: (query: string) => { this.tagSearchQuery = query; },
+      onLinkClick: (item: LinkItem) => {
+        this.recordCollectionViewUsage(item.collectionId);
+        this.openLinkInBrowser(item.url);
+      },
+      onLinkLongPress: (item: LinkItem) => this.handleLinkLongPress(item),
+      onCollectionClick: (id: number) => this.navigateToCollection(id),
+      onTagClick: (tag: string) => this.navigateToTag(tag),
+      onLoadMore: () => this.refreshLinks(false),
+      onRecordCollectionView: (id: number) => this.recordCollectionViewUsage(id),
+      onOpenLink: (url: string) => this.openLinkInBrowser(url),
+      onPullRefreshLinks: () => this.handleLibraryLinksPullRefresh(),
+      onPullRefreshCollections: () => this.handleLibraryCollectionsPullRefresh(),
+      onPullRefreshTags: () => this.handleLibraryTagsPullRefresh(),
+    };
   }
 
   private addLinkCallbacks(): AddLinkOverlayCallbacks {
