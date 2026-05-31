@@ -49,6 +49,7 @@ import { matchedCollectionByQuery, collectionLabelForQuery } from '../common/Col
 import { SettingsPanelComponent, type SettingsPanelCallbacks } from '../components/SettingsPanelComponent';
 import { ThemePickerComponent } from '../components/ThemePickerComponent';
 import { DashboardPanelComponent, type DashboardPanelCallbacks, type CollectionPreviewSection } from '../components/DashboardPanelComponent';
+import { SearchPanelComponent, type SearchPanelCallbacks } from '../components/SearchPanelComponent';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
@@ -456,7 +457,20 @@ struct Index {
           if (this.mainView === 'elements') {
             this.ElementsPanel();
           } else if (this.mainView === 'search') {
-            this.SearchPanel();
+            SearchPanelComponent({
+              searchQuery: this.searchPageQuery,
+              showAllLinks: this.searchShowAllLinks,
+              showAllCollections: this.searchShowAllCollections,
+              showAllTags: this.searchShowAllTags,
+              filteredLinks: this.filteredLinksForSearch(),
+              filteredCollections: this.filteredCollectionsForSearch(),
+              filteredTags: this.filteredTagsForSearch(),
+              hasAnyResult: this.searchHasAnyResult(),
+              highlightedLinkId: this.highlightedLinkId,
+              themeMode: this.themeMode,
+              deviceDarkMode: this.deviceDarkMode,
+              callbacks: this.searchCallbacks(),
+            });
           } else {
             SettingsPanelComponent({
               instance: this.instance,
@@ -916,121 +930,6 @@ struct Index {
     });
   }
 
-  @Builder
-  private SearchPanel() {
-    Scroll() {
-      Column({ space: 10 }) {
-        this.SectionTitle('Search');
-
-        Row({ space: 8 }) {
-          TextInput({ placeholder: 'Search links, collections, tags', text: this.searchPageQuery })
-            .onChange((value: string) => {
-              this.searchPageQuery = value;
-              this.searchShowAllLinks = false;
-              this.searchShowAllCollections = false;
-              this.searchShowAllTags = false;
-            })
-            .backgroundColor(this.inputBackgroundColor())
-            .fontColor(this.primaryTextColor())
-            .borderRadius(12)
-            .layoutWeight(1);
-
-          Button('Search')
-            .height(44)
-            .backgroundColor(this.secondaryActionBackgroundColor())
-            .fontColor(this.secondaryActionTextColor())
-            .borderRadius(12)
-            .border({ width: 1, color: this.accentColor() })
-            .onClick(() => {
-              this.refreshLinks(true);
-              this.refreshDashboard();
-            });
-        }
-        .width('100%');
-
-        if (this.searchPageQuery.trim().length === 0) {
-          Text('Insert a search term to search links, collections and tags.')
-            .fontSize(13)
-            .fontColor(this.secondaryTextColor())
-            .width('100%')
-            .textAlign(TextAlign.Start)
-            .padding({ top: 8, bottom: 8 });
-        } else {
-          if (!this.searchHasAnyResult()) {
-            Text('No results found for this search term.')
-              .fontSize(13)
-              .fontColor(this.secondaryTextColor())
-              .width('100%')
-              .textAlign(TextAlign.Start)
-              .padding({ top: 8, bottom: 8 });
-          }
-
-          this.SearchGroup('Links', this.filteredLinksForSearch().length);
-          ForEach(this.filteredLinksForSearch().slice(0, this.searchShowAllLinks ? this.filteredLinksForSearch().length : 5), (item: LinkItem) => {
-            this.LinkCard(item);
-          }, (item: LinkItem) => `search-link-${item.id}`);
-          if (this.filteredLinksForSearch().length > 5) {
-            Button(this.searchShowAllLinks ? 'Show Less' : 'Show More')
-              .fontColor(this.accentColor())
-              .backgroundColor(this.cardColor())
-              .borderRadius(10)
-              .onClick(() => {
-                this.searchShowAllLinks = !this.searchShowAllLinks;
-              });
-          }
-
-          this.SearchGroup('Collections', this.filteredCollectionsForSearch().length);
-          ForEach(this.filteredCollectionsForSearch().slice(0, this.searchShowAllCollections ? this.filteredCollectionsForSearch().length : 5), (collection: CollectionItem) => {
-            this.CollectionRow(collection);
-          }, (collection: CollectionItem) => `search-collection-${collection.id}`);
-          if (this.filteredCollectionsForSearch().length > 5) {
-            Button(this.searchShowAllCollections ? 'Show Less' : 'Show More')
-              .fontColor(this.accentColor())
-              .backgroundColor(this.cardColor())
-              .borderRadius(10)
-              .onClick(() => {
-                this.searchShowAllCollections = !this.searchShowAllCollections;
-              });
-          }
-
-          this.SearchGroup('Tags', this.filteredTagsForSearch().length);
-          ForEach(this.filteredTagsForSearch().slice(0, this.searchShowAllTags ? this.filteredTagsForSearch().length : 10), (tag: string) => {
-            this.TagListRow(tag);
-          }, (tag: string) => `search-tag-${tag}`);
-          if (this.filteredTagsForSearch().length > 10) {
-            Button(this.searchShowAllTags ? 'Show Less' : 'Show More')
-              .fontColor(this.accentColor())
-              .backgroundColor(this.cardColor())
-              .borderRadius(10)
-              .onClick(() => {
-                this.searchShowAllTags = !this.searchShowAllTags;
-              });
-          }
-        }
-      }
-      .justifyContent(FlexAlign.Start)
-      .alignItems(HorizontalAlign.Start)
-      .width('100%')
-      .padding({ bottom: 96 });
-    }
-    .width('100%')
-    .height('100%')
-    .scrollBar(BarState.Off);
-  }
-
-  @Builder
-  private SearchGroup(title: string, total: number) {
-    Row({ space: 8 }) {
-      Text(title)
-        .fontSize(16)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.primaryTextColor());
-      Text(`${total}`)
-        .fontSize(12)
-        .fontColor(this.secondaryTextColor());
-    }
-    .width('100%');
-  }
 
   @Builder
   private TagListRow(tag: string) {
@@ -2972,6 +2871,33 @@ struct Index {
 
   private isThemeOptionSelected(mode: ThemeMode): boolean {
     return this.themeMode === mode;
+  }
+
+  private searchCallbacks(): SearchPanelCallbacks {
+    return {
+      onSearchQueryChange: (query: string) => {
+        this.searchPageQuery = query;
+        this.searchShowAllLinks = false;
+        this.searchShowAllCollections = false;
+        this.searchShowAllTags = false;
+      },
+      onSearch: () => {
+        this.refreshLinks(true);
+        this.refreshDashboard();
+      },
+      onToggleShowAllLinks: () => { this.searchShowAllLinks = !this.searchShowAllLinks; },
+      onToggleShowAllCollections: () => { this.searchShowAllCollections = !this.searchShowAllCollections; },
+      onToggleShowAllTags: () => { this.searchShowAllTags = !this.searchShowAllTags; },
+      onLinkClick: (item: LinkItem) => {
+        this.recordCollectionViewUsage(item.collectionId);
+        this.openLinkInBrowser(item.url);
+      },
+      onLinkLongPress: (item: LinkItem) => this.handleLinkLongPress(item),
+      onCollectionClick: (id: number) => this.navigateToCollection(id),
+      onTagClick: (tag: string) => this.navigateToTag(tag),
+      onRecordCollectionView: (id: number) => this.recordCollectionViewUsage(id),
+      onOpenLink: (url: string) => this.openLinkInBrowser(url),
+    };
   }
 
   private dashboardCallbacks(): DashboardPanelCallbacks {
