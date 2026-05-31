@@ -178,6 +178,7 @@ struct Index {
   private hasRestoredSession: boolean = false;
   private sharePollTimer: number = -1;
   private noticeTimer: number = -1;
+  private searchDebounceTimer: number = -1;
 
   aboutToAppear(): void {
     console.info('Index aboutToAppear');
@@ -204,6 +205,11 @@ struct Index {
     if (this.noticeTimer >= 0) {
       clearTimeout(this.noticeTimer);
       this.noticeTimer = -1;
+    }
+
+    if (this.searchDebounceTimer >= 0) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = -1;
     }
   }
 
@@ -1502,7 +1508,13 @@ struct Index {
       },
       onSearchQueryChange: (query: string) => {
         this.searchQuery = query;
-        this.refreshLinks(true);
+        if (this.searchDebounceTimer >= 0) {
+          clearTimeout(this.searchDebounceTimer);
+        }
+        this.searchDebounceTimer = setTimeout(() => {
+          this.searchDebounceTimer = -1;
+          this.refreshLinks(true);
+        }, 300);
       },
       onCollectionFilterClear: () => {
         this.selectedCollectionFilterId = 0;
