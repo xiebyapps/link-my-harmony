@@ -48,15 +48,11 @@ import { writeFileSafe, readFileSafe } from '../common/FileUtils';
 import { matchedCollectionByQuery, collectionLabelForQuery } from '../common/CollectionMatcher';
 import { SettingsPanelComponent, type SettingsPanelCallbacks } from '../components/SettingsPanelComponent';
 import { ThemePickerComponent } from '../components/ThemePickerComponent';
+import { DashboardPanelComponent, type DashboardPanelCallbacks, type CollectionPreviewSection } from '../components/DashboardPanelComponent';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
 type CollectionFormSource = 'add' | 'edit';
-
-interface CollectionPreviewSection {
-  collection: CollectionItem;
-  links: Array<LinkItem>;
-}
 
 interface ScoredCollectionPreview {
   section: CollectionPreviewSection;
@@ -420,7 +416,21 @@ struct Index {
           Refresh({ refreshing: $$this.dashboardRefreshing }) {
             Scroll() {
               Column({ space: 10 }) {
-                this.DashboardPanel();
+                DashboardPanelComponent({
+              pinnedLinks: this.pinnedLinks,
+              dashboardLinks: this.dashboardLinks,
+              collectionPreviewSections: this.collectionPreviewSections(),
+              dashboardLoading: this.dashboardLoading,
+              linksTotal: this.linksTotal,
+              tagsTotal: this.tagsTotal,
+              pinnedTotal: this.pinnedTotal,
+              collectionsCount: this.collections.length,
+              collectionsCountLabel: this.formatCollectionsCount(),
+              highlightedLinkId: this.highlightedLinkId,
+              themeMode: this.themeMode,
+              deviceDarkMode: this.deviceDarkMode,
+              callbacks: this.dashboardCallbacks(),
+            });
               }
               .padding({ left: 12, right: 12, top: 12, bottom: 24 })
               .width('100%');
@@ -1387,107 +1397,6 @@ struct Index {
       .onClick(onClick);
   }
 
-  @Builder
-  private DashboardPanel() {
-    Column({ space: 10 }) {
-      this.DashboardShortcuts();
-
-      this.HorizontalLinkStrip(
-        '📌 Pinned Links',
-        this.pinnedLinks.slice(0, 10),
-        'No pinned links.',
-        () => {
-          this.navigateToPinnedLinks();
-        }
-      );
-
-      this.HorizontalLinkStrip(
-        '🕘 Recent Links',
-        this.dashboardLinks.slice(0, 10),
-        this.dashboardLoading && this.dashboardLinks.length === 0 ? 'Loading dashboard...' : 'No recent links yet.',
-        () => {
-          this.navigateToRecentLinks();
-        }
-      );
-
-      if (this.collectionPreviewSections().length === 0) {
-        this.SectionLinkTitle('Collections', () => {
-          this.navigateToCollections();
-        });
-
-        Text('No collection previews yet.')
-          .fontSize(13)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-      } else {
-        ForEach(this.collectionPreviewSections(), (section: CollectionPreviewSection) => {
-          this.CollectionPreviewSection(section);
-        }, (section: CollectionPreviewSection) => `dashboard-collection-strip-${section.collection.id}`);
-      }
-    }
-    .width('100%');
-  }
-
-  @Builder
-  private DashboardShortcuts() {
-    Column({ space: 8 }) {
-      Row({ space: 8 }) {
-        this.DashboardShortcutCard('Links', '🔗', this.formatCount(this.linksTotal), () => {
-          this.navigateToAllLinks();
-        });
-        this.DashboardShortcutCard('Collections', '🗂', this.formatCollectionsCount(), () => {
-          this.navigateToCollections();
-        });
-      }
-      .width('100%');
-
-      Row({ space: 8 }) {
-        this.DashboardShortcutCard('Tags', '#', this.formatCount(this.tagsTotal), () => {
-          this.navigateToTags();
-        });
-        this.DashboardShortcutCard('Pinned', '📌', this.formatCount(this.pinnedTotal), () => {
-          this.navigateToPinnedLinks();
-        });
-      }
-      .width('100%');
-    }
-    .width('100%');
-  }
-
-  @Builder
-  private DashboardShortcutCard(title: string, icon: string, value: string, onClick: () => void) {
-    Row({ space: 10 }) {
-      Text(icon)
-        .fontSize(20)
-        .width(28)
-        .textAlign(TextAlign.Center);
-
-      Column({ space: 2 }) {
-        Text(title)
-          .fontSize(13)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-
-        Text(value)
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(this.primaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-      }
-      .layoutWeight(1)
-      .alignItems(HorizontalAlign.Start);
-    }
-    .layoutWeight(1)
-    .padding(12)
-    .backgroundColor(this.cardColor())
-    .borderRadius(14)
-    .onClick(() => {
-      onClick();
-    });
-  }
 
   @Builder
   private StatCard(title: string, value: string, onClick: () => void) {
@@ -1631,147 +1540,6 @@ struct Index {
     );
   }
 
-  @Builder
-  private LinkStripCard(item: LinkItem) {
-    Column({ space: 6 }) {
-      Row({ space: 8 }) {
-        Text(item.name.length > 0 ? item.name : item.url)
-          .fontSize(15)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.primaryTextColor())
-          .layoutWeight(1)
-          .maxLines(2)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .textAlign(TextAlign.Start);
-
-        if (item.pinned) {
-          Text('Pin')
-            .fontSize(11)
-            .fontColor(this.accentColor());
-        }
-      }
-      .width('100%');
-
-      Text(item.collectionName.length > 0 ? item.collectionName : 'Unorganized')
-        .fontSize(12)
-        .fontColor(item.collectionColor.length > 0 ? item.collectionColor : this.accentColor())
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .width('100%')
-        .textAlign(TextAlign.Start);
-
-      Text(item.url)
-        .fontSize(11)
-        .fontColor(this.secondaryTextColor())
-        .maxLines(2)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .width('100%')
-        .textAlign(TextAlign.Start);
-    }
-    .width(260)
-    .height(124)
-    .padding(12)
-    .backgroundColor(this.cardColor())
-    .borderRadius(14)
-    .alignItems(HorizontalAlign.Start)
-    .onClick(() => {
-      this.highlightedLinkId = 0;
-      this.recordCollectionViewUsage(item.collectionId);
-      this.openLinkInBrowser(item.url);
-    })
-    .gesture(
-      LongPressGesture()
-        .onAction(() => {
-          this.highlightedLinkId = 0;
-          this.handleLinkLongPress(item);
-        })
-    );
-  }
-
-  @Builder
-  private HorizontalLinkStrip(title: string, items: Array<LinkItem>, emptyText: string, onNavigate: () => void) {
-    Column({ space: 8 }) {
-      this.SectionLinkTitle(title, onNavigate);
-
-      if (items.length === 0) {
-        Text(emptyText)
-          .fontSize(13)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-      } else {
-        List({ space: 10 }) {
-          ForEach(items, (item: LinkItem) => {
-            ListItem() {
-              this.LinkStripCard(item);
-            }
-          }, (item: LinkItem) => `${title}-${item.id}`);
-        }
-        .listDirection(Axis.Horizontal)
-        .width('100%')
-        .height(140)
-        .scrollBar(BarState.Off)
-        .nestedScroll({
-          scrollForward: NestedScrollMode.PARENT_FIRST,
-          scrollBackward: NestedScrollMode.SELF_FIRST,
-        });
-      }
-    }
-    .alignItems(HorizontalAlign.Start)
-    .width('100%');
-  }
-
-  @Builder
-  private SectionLinkTitle(title: string, onClick: () => void) {
-    Row({ space: 8 }) {
-      Text(title)
-        .fontSize(16)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.primaryTextColor())
-        .layoutWeight(1)
-        .textAlign(TextAlign.Start);
-
-      Button('View all')
-        .backgroundColor(Color.Transparent)
-        .fontColor(this.secondaryTextColor())
-        .fontSize(12)
-        .borderRadius(999)
-        .padding({ left: 2, right: 2, top: 0, bottom: 0 })
-        .height(24)
-        .onClick(() => {
-          onClick();
-        });
-    }
-    .width('100%')
-    .justifyContent(FlexAlign.SpaceBetween)
-    .alignItems(VerticalAlign.Center);
-  }
-
-  @Builder
-  private CollectionPreviewSection(section: CollectionPreviewSection) {
-    Column({ space: 8 }) {
-      this.SectionLinkTitle(section.collection.name.length > 0 ? section.collection.name : 'Untitled', () => {
-        this.navigateToCollection(section.collection.id);
-      });
-
-      List({ space: 10 }) {
-        ForEach(section.links, (item: LinkItem) => {
-          ListItem() {
-            this.LinkStripCard(item);
-          }
-        }, (item: LinkItem) => `collection-strip-${section.collection.id}-${item.id}`);
-      }
-      .listDirection(Axis.Horizontal)
-      .width('100%')
-      .height(140)
-      .scrollBar(BarState.Off)
-      .nestedScroll({
-        scrollForward: NestedScrollMode.PARENT_FIRST,
-        scrollBackward: NestedScrollMode.SELF_FIRST,
-      });
-    }
-    .width('100%');
-  }
 
   @Builder
   private CollectionMatchHints(query: string, matches: Array<CollectionItem>, onPick: (name: string) => void, summary: string) {
@@ -3204,6 +2972,20 @@ struct Index {
 
   private isThemeOptionSelected(mode: ThemeMode): boolean {
     return this.themeMode === mode;
+  }
+
+  private dashboardCallbacks(): DashboardPanelCallbacks {
+    return {
+      onNavigateAllLinks: () => this.navigateToAllLinks(),
+      onNavigatePinnedLinks: () => this.navigateToPinnedLinks(),
+      onNavigateRecentLinks: () => this.navigateToRecentLinks(),
+      onNavigateCollections: () => this.navigateToCollections(),
+      onNavigateTags: () => this.navigateToTags(),
+      onNavigateCollection: (id: number) => this.navigateToCollection(id),
+      onOpenLink: (url: string) => this.openLinkInBrowser(url),
+      onLinkLongPress: (item: LinkItem) => this.handleLinkLongPress(item),
+      onRecordCollectionView: (id: number) => this.recordCollectionViewUsage(id),
+    };
   }
 
   private settingsCallbacks(): SettingsPanelCallbacks {
