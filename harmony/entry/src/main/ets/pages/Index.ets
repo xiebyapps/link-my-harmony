@@ -184,9 +184,9 @@ struct Index {
 
     this.hasRestoredSession = true;
     this.startSharePolling();
-    this.storage = new SessionStorage(getContext(this));
-    this.usageStorage = new CollectionUsageStorage(getContext(this));
-    this.hostMemoryStorage = new HostCollectionMemoryStorage(getContext(this));
+    this.storage = new SessionStorage(this.getUIContext().getHostContext()!);
+    this.usageStorage = new CollectionUsageStorage(this.getUIContext().getHostContext()!);
+    this.hostMemoryStorage = new HostCollectionMemoryStorage(this.getUIContext().getHostContext()!);
     this.restoreSession();
   }
 
@@ -3492,7 +3492,7 @@ struct Index {
 
   private async persistCollectionUsage(): Promise<void> {
     if (this.usageStorage === null) {
-      this.usageStorage = new CollectionUsageStorage(getContext(this));
+      this.usageStorage = new CollectionUsageStorage(this.getUIContext().getHostContext()!);
     }
     try {
       await this.usageStorage.save(this.collectionUsage);
@@ -3550,7 +3550,7 @@ struct Index {
 
   private async persistHostMemory(): Promise<void> {
     if (this.hostMemoryStorage === null) {
-      this.hostMemoryStorage = new HostCollectionMemoryStorage(getContext(this));
+      this.hostMemoryStorage = new HostCollectionMemoryStorage(this.getUIContext().getHostContext()!);
     }
     try {
       await this.hostMemoryStorage.save(this.hostMemory);
@@ -3849,10 +3849,10 @@ struct Index {
 
     try {
       if (this.storage === null) {
-        this.storage = new SessionStorage(getContext(this));
+        this.storage = new SessionStorage(this.getUIContext().getHostContext()!);
       }
 
-      await this.service.attachContext(getContext(this));
+      await this.service.attachContext(this.getUIContext().getHostContext()!);
 
       const state = await this.storage.load();
       this.instance = normalizeInstanceUrl(state.instance);
@@ -3864,7 +3864,7 @@ struct Index {
       this.syncApiContext();
 
       if (this.usageStorage === null) {
-        this.usageStorage = new CollectionUsageStorage(getContext(this));
+        this.usageStorage = new CollectionUsageStorage(this.getUIContext().getHostContext()!);
       }
       try {
         this.collectionUsage = await this.usageStorage.load();
@@ -3873,7 +3873,7 @@ struct Index {
       }
 
       if (this.hostMemoryStorage === null) {
-        this.hostMemoryStorage = new HostCollectionMemoryStorage(getContext(this));
+        this.hostMemoryStorage = new HostCollectionMemoryStorage(this.getUIContext().getHostContext()!);
       }
       try {
         this.hostMemory = await this.hostMemoryStorage.load();
@@ -3919,7 +3919,7 @@ struct Index {
 
   private async persistSessionState(): Promise<void> {
     if (this.storage === null) {
-      this.storage = new SessionStorage(getContext(this));
+      this.storage = new SessionStorage(this.getUIContext().getHostContext()!);
     }
 
     await this.storage.save({
@@ -4871,7 +4871,7 @@ struct Index {
       return;
     }
 
-    const context = getContext(this) as common.UIAbilityContext;
+    const context = this.getUIContext().getHostContext()! as common.UIAbilityContext;
     context.startAbility({
       action: 'ohos.want.action.viewData',
       entities: ['entity.system.browsable'],
