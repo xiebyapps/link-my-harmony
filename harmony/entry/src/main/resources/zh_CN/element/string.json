@@ -7,6 +7,358 @@
     {
       "name": "module_desc",
       "value": "鸿笺 - 链接收藏管理"
+    },
+    {
+      "name": "nav_home",
+      "value": "首页"
+    },
+    {
+      "name": "nav_library",
+      "value": "收藏库"
+    },
+    {
+      "name": "nav_search",
+      "value": "搜索"
+    },
+    {
+      "name": "nav_menu",
+      "value": "菜单"
+    },
+    {
+      "name": "subtitle_home",
+      "value": "最近、置顶与收藏夹"
+    },
+    {
+      "name": "subtitle_library",
+      "value": "链接、收藏夹与标签"
+    },
+    {
+      "name": "subtitle_search",
+      "value": "搜索链接、收藏夹和标签"
+    },
+    {
+      "name": "subtitle_menu",
+      "value": "设置与快捷操作"
+    },
+    {
+      "name": "tab_links",
+      "value": "链接"
+    },
+    {
+      "name": "tab_collections",
+      "value": "收藏夹"
+    },
+    {
+      "name": "tab_tags",
+      "value": "标签"
+    },
+    {
+      "name": "btn_sign_in",
+      "value": "登录"
+    },
+    {
+      "name": "btn_signing_in",
+      "value": "登录中..."
+    },
+    {
+      "name": "btn_use_offline",
+      "value": "离线使用（仅本地）"
+    },
+    {
+      "name": "btn_add_link",
+      "value": "添加链接"
+    },
+    {
+      "name": "btn_edit_link",
+      "value": "编辑链接"
+    },
+    {
+      "name": "btn_delete_link",
+      "value": "删除链接"
+    },
+    {
+      "name": "btn_create_collection",
+      "value": "创建收藏夹"
+    },
+    {
+      "name": "btn_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "btn_save",
+      "value": "保存"
+    },
+    {
+      "name": "btn_create",
+      "value": "创建"
+    },
+    {
+      "name": "btn_apply_server",
+      "value": "应用服务器"
+    },
+    {
+      "name": "btn_export",
+      "value": "导出"
+    },
+    {
+      "name": "btn_import_merge",
+      "value": "从文件导入（合并）"
+    },
+    {
+      "name": "btn_import_replace",
+      "value": "从文件导入（替换）"
+    },
+    {
+      "name": "btn_clear_local",
+      "value": "清除本地数据"
+    },
+    {
+      "name": "btn_confirm_import",
+      "value": "确认导入"
+    },
+    {
+      "name": "btn_copy_clipboard",
+      "value": "复制到剪贴板"
+    },
+    {
+      "name": "label_server_url",
+      "value": "服务器地址"
+    },
+    {
+      "name": "label_username",
+      "value": "用户名"
+    },
+    {
+      "name": "label_password",
+      "value": "密码"
+    },
+    {
+      "name": "label_link_name",
+      "value": "名称"
+    },
+    {
+      "name": "label_link_url",
+      "value": "链接"
+    },
+    {
+      "name": "label_description",
+      "value": "描述"
+    },
+    {
+      "name": "label_description_optional",
+      "value": "描述（可选）"
+    },
+    {
+      "name": "label_collection",
+      "value": "收藏夹"
+    },
+    {
+      "name": "label_collection_name",
+      "value": "收藏夹名称"
+    },
+    {
+      "name": "label_tags",
+      "value": "标签"
+    },
+    {
+      "name": "label_theme",
+      "value": "主题"
+    },
+    {
+      "name": "label_appearance",
+      "value": "外观"
+    },
+    {
+      "name": "label_server",
+      "value": "服务器"
+    },
+    {
+      "name": "label_local_data",
+      "value": "本地数据"
+    },
+    {
+      "name": "label_linkwarden",
+      "value": "Linkwarden"
+    },
+    {
+      "name": "hint_search",
+      "value": "搜索链接、收藏夹、标签"
+    },
+    {
+      "name": "hint_collection_query",
+      "value": "搜索或创建收藏夹"
+    },
+    {
+      "name": "hint_tags_input",
+      "value": "添加标签（逗号分隔）"
+    },
+    {
+      "name": "msg_restoring",
+      "value": "正在恢复会话..."
+    },
+    {
+      "name": "msg_loading_more",
+      "value": "加载更多…"
+    },
+    {
+      "name": "msg_no_more_links",
+      "value": "没有更多链接"
+    },
+    {
+      "name": "msg_no_tags",
+      "value": "未找到标签。"
+    },
+    {
+      "name": "msg_no_results",
+      "value": "未找到匹配的搜索结果。"
+    },
+    {
+      "name": "msg_search_hint",
+      "value": "输入关键词搜索链接、收藏夹和标签。"
+    },
+    {
+      "name": "msg_offline_mode",
+      "value": "离线模式 — 数据保存在本设备。"
+    },
+    {
+      "name": "msg_session_restored",
+      "value": "会话已恢复。"
+    },
+    {
+      "name": "msg_signed_in",
+      "value": "登录成功。"
+    },
+    {
+      "name": "msg_settings_saved",
+      "value": "设置已保存。"
+    },
+    {
+      "name": "msg_server_changed",
+      "value": "设置已保存。服务器已更改，请重新登录。"
+    },
+    {
+      "name": "msg_collection_created",
+      "value": "收藏夹已创建。"
+    },
+    {
+      "name": "msg_export_success",
+      "value": "备份已保存"
+    },
+    {
+      "name": "msg_export_failed",
+      "value": "导出失败"
+    },
+    {
+      "name": "msg_import_success",
+      "value": "导入完成"
+    },
+    {
+      "name": "msg_import_failed",
+      "value": "导入失败"
+    },
+    {
+      "name": "msg_import_cancelled",
+      "value": "导入已取消。"
+    },
+    {
+      "name": "msg_export_cancelled",
+      "value": "导出已取消。"
+    },
+    {
+      "name": "msg_link_deleted",
+      "value": "链接已删除。"
+    },
+    {
+      "name": "msg_link_saved",
+      "value": "链接已保存。"
+    },
+    {
+      "name": "msg_link_added",
+      "value": "链接已添加。"
+    },
+    {
+      "name": "msg_copied",
+      "value": "已复制到剪贴板。"
+    },
+    {
+      "name": "msg_clear_confirm",
+      "value": "此操作将永久删除所有本地链接和收藏夹。是否继续？"
+    },
+    {
+      "name": "msg_offline_desc",
+      "value": "离线模式将所有数据保存在本设备。您可以稍后同步到 Linkwarden。"
+    },
+    {
+      "name": "msg_server_desc",
+      "value": "更改服务器地址。保存新服务器会使当前会话退出。"
+    },
+    {
+      "name": "msg_local_data_desc",
+      "value": "存储在本设备"
+    },
+    {
+      "name": "msg_links_count",
+      "value": "个链接"
+    },
+    {
+      "name": "msg_collections_count",
+      "value": "个收藏夹"
+    },
+    {
+      "name": "msg_tags_count",
+      "value": "个标签"
+    },
+    {
+      "name": "msg_pinned_count",
+      "value": "个置顶"
+    },
+    {
+      "name": "title_import_preview",
+      "value": "导入预览"
+    },
+    {
+      "name": "title_choose_collection",
+      "value": "选择收藏夹"
+    },
+    {
+      "name": "title_create_collection",
+      "value": "创建收藏夹"
+    },
+    {
+      "name": "title_existing_collection",
+      "value": "已有收藏夹"
+    },
+    {
+      "name": "title_sync",
+      "value": "同步"
+    },
+    {
+      "name": "theme_light",
+      "value": "浅色"
+    },
+    {
+      "name": "theme_dark",
+      "value": "深色"
+    },
+    {
+      "name": "theme_system",
+      "value": "跟随系统"
+    },
+    {
+      "name": "unorganized",
+      "value": "未分类"
+    },
+    {
+      "name": "links_count",
+      "value": "%1$d 个链接"
+    },
+    {
+      "name": "collections_count",
+      "value": "%1$d 个收藏夹"
+    },
+    {
+      "name": "tags_count",
+      "value": "%1$d 个标签"
     }
   ]
 }

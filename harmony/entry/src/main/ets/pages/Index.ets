@@ -219,7 +219,7 @@ struct Index {
       Column() {
         if (this.restoring) {
           Column({ space: 12 }) {
-            Text('Restoring session...')
+            Text($r('app.string.msg_restoring'))
               .fontSize(14)
               .fontColor(this.secondaryTextColor())
               .width('100%')
@@ -314,9 +314,9 @@ struct Index {
   @Builder
   private LoginPanel() {
     Column({ space: 10 }) {
-      this.SectionSubtitle('Sign in to manage links, collections, and quick capture.');
+      this.SectionSubtitle($r('app.string.msg_offline_desc'));
 
-      TextInput({ placeholder: 'Server URL', text: this.instance })
+      TextInput({ placeholder: $r('app.string.label_server_url'), text: this.instance })
         .onChange((value: string) => {
           this.instance = value;
         })
@@ -325,7 +325,7 @@ struct Index {
         .borderRadius(12)
         .width('100%');
 
-      TextInput({ placeholder: 'Username', text: this.username })
+      TextInput({ placeholder: $r('app.string.label_username'), text: this.username })
         .onChange((value: string) => {
           this.username = value;
         })
@@ -334,7 +334,7 @@ struct Index {
         .borderRadius(12)
         .width('100%');
 
-      TextInput({ placeholder: 'Password', text: this.password })
+      TextInput({ placeholder: $r('app.string.label_password'), text: this.password })
         .type(InputType.Password)
         .onChange((value: string) => {
           this.password = value;
@@ -346,14 +346,14 @@ struct Index {
 
       this.ThemePicker();
 
-      Button(this.loading ? 'Signing in...' : 'Sign In')
+      Button(this.loading ? $r('app.string.btn_signing_in') : $r('app.string.btn_sign_in'))
         .enabled(!this.loading)
         .width('100%')
         .onClick(() => {
           this.handleSignIn();
         });
 
-      Button('Use offline (local only)')
+      Button($r('app.string.btn_use_offline'))
         .backgroundColor(Color.Transparent)
         .fontColor(this.primaryTextColor())
         .borderColor(this.inputBackgroundColor())
@@ -364,7 +364,7 @@ struct Index {
           this.handleEnterOfflineMode();
         });
 
-      Text('Offline mode keeps everything on this device. You can sync it to Linkwarden later.')
+      Text($r('app.string.msg_offline_desc'))
         .fontSize(12)
         .fontColor(this.secondaryTextColor())
         .width('100%')
@@ -566,7 +566,7 @@ struct Index {
     Column({ space: 12 }) {
       // Segmented control
       Row() {
-        Text('Links')
+        Text($r('app.string.tab_links'))
           .layoutWeight(1)
           .height(32)
           .fontSize(13)
@@ -580,7 +580,7 @@ struct Index {
             this.refreshLinks(true);
           });
 
-        Text('Collections')
+        Text($r('app.string.tab_collections'))
           .layoutWeight(1)
           .height(32)
           .fontSize(13)
@@ -594,7 +594,7 @@ struct Index {
             this.refreshDashboard();
           });
 
-        Text('Tags')
+        Text($r('app.string.tab_tags'))
           .layoutWeight(1)
           .height(32)
           .fontSize(13)
@@ -749,14 +749,14 @@ struct Index {
       });
 
       if (this.loadingMore) {
-        Text('Loading more…')
+        Text($r('app.string.msg_loading_more'))
           .fontSize(12)
           .fontColor(this.secondaryTextColor())
           .width('100%')
           .textAlign(TextAlign.Center)
           .padding({ top: 8, bottom: 8 });
       } else if (!this.hasMore && this.links.length > 0) {
-        Text('No more links')
+        Text($r('app.string.msg_no_more_links'))
           .fontSize(12)
           .fontColor(this.secondaryTextColor())
           .width('100%')
@@ -835,7 +835,7 @@ struct Index {
             .width('100%');
 
           if (this.filteredTags().length === 0) {
-            Text('No tags found.')
+            Text($r('app.string.msg_no_tags'))
               .fontSize(13)
               .fontColor(this.secondaryTextColor())
               .width('100%')
@@ -1134,7 +1134,7 @@ struct Index {
   @Builder
   private DraftTagEditor() {
     Column({ space: 10 }) {
-      Text('Tags')
+      Text($r('app.string.tab_tags'))
         .fontSize(13)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.secondaryTextColor())
@@ -1235,7 +1235,7 @@ struct Index {
   @Builder
   private EditTagEditor() {
     Column({ space: 10 }) {
-      Text('Tags')
+      Text($r('app.string.tab_tags'))
         .fontSize(13)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.secondaryTextColor())
@@ -2203,8 +2203,8 @@ struct Index {
     Scroll() {
       Column({ space: 14 }) {
         Column({ space: 6 }) {
-          this.SectionTitle('Menu');
-          this.SectionSubtitle('Refine appearance, server connection, and Linkwarden shortcuts.');
+          this.SectionTitle($r('app.string.nav_menu'));
+          this.SectionSubtitle($r('app.string.subtitle_menu'));
         }
         .padding(18)
         .backgroundColor(this.cardColor())
@@ -2214,7 +2214,7 @@ struct Index {
 
         Column({ space: 12 }) {
           Column({ space: 4 }) {
-            Text('Linkwarden')
+            Text($r('app.string.label_linkwarden'))
               .fontSize(20)
               .fontWeight(FontWeight.Bold)
               .fontColor(this.primaryTextColor())
@@ -2241,7 +2241,7 @@ struct Index {
                 .textAlign(TextAlign.Center)
                 .width('100%')
                 .maxLines(1);
-              Text('Theme')
+              Text($r('app.string.label_theme'))
                 .fontSize(10)
                 .fontColor(this.secondaryTextColor())
                 .textAlign(TextAlign.Center)
@@ -2262,7 +2262,7 @@ struct Index {
                 .textAlign(TextAlign.Center)
                 .width('100%')
                 .maxLines(1);
-              Text('Links')
+              Text($r('app.string.tab_links'))
                 .fontSize(10)
                 .fontColor(this.secondaryTextColor())
                 .textAlign(TextAlign.Center)
@@ -2286,7 +2286,7 @@ struct Index {
                 .textAlign(TextAlign.Center)
                 .width('100%')
                 .maxLines(1);
-              Text('Tags')
+              Text($r('app.string.tab_tags'))
                 .fontSize(10)
                 .fontColor(this.secondaryTextColor())
                 .textAlign(TextAlign.Center)
@@ -2329,7 +2329,7 @@ struct Index {
         .width('100%');
 
         Column({ space: 10 }) {
-          Text('Appearance')
+          Text($r('app.string.label_appearance'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
@@ -2345,20 +2345,20 @@ struct Index {
         .width('100%');
 
         Column({ space: 10 }) {
-          Text('Server')
+          Text($r('app.string.label_server'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Text('Change server endpoint. Saving a new server signs current session out.')
+          Text($r('app.string.msg_server_desc'))
             .fontSize(12)
             .fontColor(this.secondaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          TextInput({ placeholder: 'Server URL', text: this.settingsInstance })
+          TextInput({ placeholder: $r('app.string.label_server_url'), text: this.settingsInstance })
             .onChange((value: string) => {
               this.settingsInstance = value;
             })
@@ -2367,7 +2367,7 @@ struct Index {
             .borderRadius(12)
             .width('100%');
 
-          Button('Apply Server')
+          Button($r('app.string.btn_apply_server'))
             .width('100%')
             .height(44)
             .backgroundColor(this.themePalette().accentSoft)
@@ -2385,21 +2385,21 @@ struct Index {
         .width('100%');
 
         Column({ space: 10 }) {
-          Text('Local data')
+          Text($r('app.string.label_local_data'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.primaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
-          Text(`Stored on this device: ${this.localLinkCount} links, ${this.localCollectionCount} collections. Back up regularly — data is kept in the app sandbox and will be lost if you uninstall.`)
+          Text(`${$r('app.string.msg_local_data_desc')}: ${this.localLinkCount} ${$r('app.string.msg_links_count')}, ${this.localCollectionCount} ${$r('app.string.msg_collections_count')}. Back up regularly — data is kept in the app sandbox and will be lost if you uninstall.`)
             .fontSize(12)
             .fontColor(this.secondaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
           Row({ space: 8 }) {
-            Button(this.exportingLocal ? 'Exporting…' : 'Copy to clipboard')
+            Button(this.exportingLocal ? $r('app.string.btn_export') + '…' : $r('app.string.btn_copy_clipboard'))
               .enabled(!this.exportingLocal)
               .layoutWeight(1)
               .height(44)
@@ -2411,7 +2411,7 @@ struct Index {
                 this.handleExportLocal();
               });
 
-            Button(this.exportingLocal ? 'Saving…' : 'Save to file…')
+            Button(this.exportingLocal ? $r('app.string.btn_export') + '…' : $r('app.string.btn_export') + '…')
               .enabled(!this.exportingLocal)
               .layoutWeight(1)
               .height(44)
@@ -2425,14 +2425,14 @@ struct Index {
           }
           .width('100%');
 
-          Text('Paste a folio-backup JSON below, or load one from a file.')
+          Text($r('app.string.btn_import_merge'))
             .fontSize(12)
             .fontColor(this.secondaryTextColor())
             .width('100%')
             .textAlign(TextAlign.Start);
 
           Row({ space: 8 }) {
-            Button(this.importingLocal ? 'Merging…' : 'Import from file (merge)')
+            Button(this.importingLocal ? $r('app.string.btn_import_merge') + '…' : $r('app.string.btn_import_merge'))
               .enabled(!this.importingLocal)
               .layoutWeight(1)
               .height(44)
@@ -2444,7 +2444,7 @@ struct Index {
                 this.handleImportFromFile('merge');
               });
 
-            Button(this.importingLocal ? 'Replacing…' : 'Import from file (replace)')
+            Button(this.importingLocal ? $r('app.string.btn_import_replace') + '…' : $r('app.string.btn_import_replace'))
               .enabled(!this.importingLocal)
               .layoutWeight(1)
               .height(44)
@@ -3040,7 +3040,7 @@ struct Index {
   }
 
   @Builder
-  private SectionTitle(value: string) {
+  private SectionTitle(value: Resource | string) {
     Text(value)
       .fontSize(20)
       .fontWeight(FontWeight.Bold)
@@ -3050,7 +3050,7 @@ struct Index {
   }
 
   @Builder
-  private SectionSubtitle(value: string) {
+  private SectionSubtitle(value: Resource | string) {
     Text(value)
       .fontSize(12)
       .fontColor(this.secondaryTextColor())
@@ -3216,36 +3216,36 @@ struct Index {
     this.refreshLocalCounts();
   }
 
-  private mainViewTitle(): string {
+  private mainViewTitle(): Resource {
     if (this.mainView === 'dashboard') {
-      return 'Home';
+      return $r('app.string.nav_home');
     }
 
     if (this.mainView === 'elements') {
-      return 'Library';
+      return $r('app.string.nav_library');
     }
 
     if (this.mainView === 'search') {
-      return 'Search';
+      return $r('app.string.nav_search');
     }
 
-    return 'Menu';
+    return $r('app.string.nav_menu');
   }
 
-  private mainViewSubtitle(): string {
+  private mainViewSubtitle(): Resource {
     if (this.mainView === 'dashboard') {
-      return 'Recent, pinned, and collections';
+      return $r('app.string.subtitle_home');
     }
 
     if (this.mainView === 'elements') {
-      return 'Links, collections, and tags';
+      return $r('app.string.subtitle_library');
     }
 
     if (this.mainView === 'search') {
-      return 'Find links, collections, and tags';
+      return $r('app.string.subtitle_search');
     }
 
-    return 'Settings and shortcuts';
+    return $r('app.string.subtitle_menu');
   }
 
   private handleNewLinkUrlChange(value: string): void {

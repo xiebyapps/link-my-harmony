@@ -7,6 +7,358 @@
     {
       "name": "module_desc",
       "value": "Folio - Link collection manager"
+    },
+    {
+      "name": "nav_home",
+      "value": "Home"
+    },
+    {
+      "name": "nav_library",
+      "value": "Library"
+    },
+    {
+      "name": "nav_search",
+      "value": "Search"
+    },
+    {
+      "name": "nav_menu",
+      "value": "Menu"
+    },
+    {
+      "name": "subtitle_home",
+      "value": "Recent, pinned, and collections"
+    },
+    {
+      "name": "subtitle_library",
+      "value": "Links, collections, and tags"
+    },
+    {
+      "name": "subtitle_search",
+      "value": "Find links, collections, and tags"
+    },
+    {
+      "name": "subtitle_menu",
+      "value": "Settings and shortcuts"
+    },
+    {
+      "name": "tab_links",
+      "value": "Links"
+    },
+    {
+      "name": "tab_collections",
+      "value": "Collections"
+    },
+    {
+      "name": "tab_tags",
+      "value": "Tags"
+    },
+    {
+      "name": "btn_sign_in",
+      "value": "Sign In"
+    },
+    {
+      "name": "btn_signing_in",
+      "value": "Signing in..."
+    },
+    {
+      "name": "btn_use_offline",
+      "value": "Use offline (local only)"
+    },
+    {
+      "name": "btn_add_link",
+      "value": "Add Link"
+    },
+    {
+      "name": "btn_edit_link",
+      "value": "Edit Link"
+    },
+    {
+      "name": "btn_delete_link",
+      "value": "Delete Link"
+    },
+    {
+      "name": "btn_create_collection",
+      "value": "Create Collection"
+    },
+    {
+      "name": "btn_cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "btn_save",
+      "value": "Save"
+    },
+    {
+      "name": "btn_create",
+      "value": "Create"
+    },
+    {
+      "name": "btn_apply_server",
+      "value": "Apply Server"
+    },
+    {
+      "name": "btn_export",
+      "value": "Export"
+    },
+    {
+      "name": "btn_import_merge",
+      "value": "Import from file (merge)"
+    },
+    {
+      "name": "btn_import_replace",
+      "value": "Import from file (replace)"
+    },
+    {
+      "name": "btn_clear_local",
+      "value": "Clear local data"
+    },
+    {
+      "name": "btn_confirm_import",
+      "value": "Confirm import"
+    },
+    {
+      "name": "btn_copy_clipboard",
+      "value": "Copy to clipboard"
+    },
+    {
+      "name": "label_server_url",
+      "value": "Server URL"
+    },
+    {
+      "name": "label_username",
+      "value": "Username"
+    },
+    {
+      "name": "label_password",
+      "value": "Password"
+    },
+    {
+      "name": "label_link_name",
+      "value": "Name"
+    },
+    {
+      "name": "label_link_url",
+      "value": "URL"
+    },
+    {
+      "name": "label_description",
+      "value": "Description"
+    },
+    {
+      "name": "label_description_optional",
+      "value": "Description (optional)"
+    },
+    {
+      "name": "label_collection",
+      "value": "Collection"
+    },
+    {
+      "name": "label_collection_name",
+      "value": "Collection name"
+    },
+    {
+      "name": "label_tags",
+      "value": "Tags"
+    },
+    {
+      "name": "label_theme",
+      "value": "Theme"
+    },
+    {
+      "name": "label_appearance",
+      "value": "Appearance"
+    },
+    {
+      "name": "label_server",
+      "value": "Server"
+    },
+    {
+      "name": "label_local_data",
+      "value": "Local data"
+    },
+    {
+      "name": "label_linkwarden",
+      "value": "Linkwarden"
+    },
+    {
+      "name": "hint_search",
+      "value": "Search links, collections, tags"
+    },
+    {
+      "name": "hint_collection_query",
+      "value": "Search or create collection"
+    },
+    {
+      "name": "hint_tags_input",
+      "value": "Add tags (comma separated)"
+    },
+    {
+      "name": "msg_restoring",
+      "value": "Restoring session..."
+    },
+    {
+      "name": "msg_loading_more",
+      "value": "Loading more…"
+    },
+    {
+      "name": "msg_no_more_links",
+      "value": "No more links"
+    },
+    {
+      "name": "msg_no_tags",
+      "value": "No tags found."
+    },
+    {
+      "name": "msg_no_results",
+      "value": "No results found for this search term."
+    },
+    {
+      "name": "msg_search_hint",
+      "value": "Insert a search term to search links, collections and tags."
+    },
+    {
+      "name": "msg_offline_mode",
+      "value": "Offline mode — data stays on this device."
+    },
+    {
+      "name": "msg_session_restored",
+      "value": "Session restored."
+    },
+    {
+      "name": "msg_signed_in",
+      "value": "Signed in successfully."
+    },
+    {
+      "name": "msg_settings_saved",
+      "value": "Settings saved."
+    },
+    {
+      "name": "msg_server_changed",
+      "value": "Settings saved. Server changed, please sign in again."
+    },
+    {
+      "name": "msg_collection_created",
+      "value": "Collection created."
+    },
+    {
+      "name": "msg_export_success",
+      "value": "Backup saved"
+    },
+    {
+      "name": "msg_export_failed",
+      "value": "Export failed"
+    },
+    {
+      "name": "msg_import_success",
+      "value": "Import complete"
+    },
+    {
+      "name": "msg_import_failed",
+      "value": "Import failed"
+    },
+    {
+      "name": "msg_import_cancelled",
+      "value": "Import cancelled."
+    },
+    {
+      "name": "msg_export_cancelled",
+      "value": "Export cancelled."
+    },
+    {
+      "name": "msg_link_deleted",
+      "value": "Link deleted."
+    },
+    {
+      "name": "msg_link_saved",
+      "value": "Link saved."
+    },
+    {
+      "name": "msg_link_added",
+      "value": "Link added."
+    },
+    {
+      "name": "msg_copied",
+      "value": "Copied to clipboard."
+    },
+    {
+      "name": "msg_clear_confirm",
+      "value": "This will permanently delete all local links and collections. Continue?"
+    },
+    {
+      "name": "msg_offline_desc",
+      "value": "Offline mode keeps everything on this device. You can sync it to Linkwarden later."
+    },
+    {
+      "name": "msg_server_desc",
+      "value": "Change server endpoint. Saving a new server signs current session out."
+    },
+    {
+      "name": "msg_local_data_desc",
+      "value": "Stored on this device"
+    },
+    {
+      "name": "msg_links_count",
+      "value": "links"
+    },
+    {
+      "name": "msg_collections_count",
+      "value": "collections"
+    },
+    {
+      "name": "msg_tags_count",
+      "value": "tags"
+    },
+    {
+      "name": "msg_pinned_count",
+      "value": "pinned"
+    },
+    {
+      "name": "title_import_preview",
+      "value": "Import preview"
+    },
+    {
+      "name": "title_choose_collection",
+      "value": "Choose Collection"
+    },
+    {
+      "name": "title_create_collection",
+      "value": "Create Collection"
+    },
+    {
+      "name": "title_existing_collection",
+      "value": "Existing collection"
+    },
+    {
+      "name": "title_sync",
+      "value": "Sync"
+    },
+    {
+      "name": "theme_light",
+      "value": "Light"
+    },
+    {
+      "name": "theme_dark",
+      "value": "Dark"
+    },
+    {
+      "name": "theme_system",
+      "value": "System"
+    },
+    {
+      "name": "unorganized",
+      "value": "Unorganized"
+    },
+    {
+      "name": "links_count",
+      "value": "%1$d links"
+    },
+    {
+      "name": "collections_count",
+      "value": "%1$d collections"
+    },
+    {
+      "name": "tags_count",
+      "value": "%1$d tags"
     }
   ]
 }
