@@ -1,7 +1,9 @@
+import { DEFAULT_INSTANCE_URL } from './Query';
+
+export { DEFAULT_INSTANCE_URL };
+
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type SessionMode = 'online' | 'offline';
-
-export const DEFAULT_INSTANCE_URL = 'https://cloud.linkwarden.app';
 
 export interface SessionState {
   instance: string;

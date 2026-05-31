@@ -22,7 +22,6 @@ import {
   LOCAL_DB_VERSION,
   BACKUP_FORMAT,
   BACKUP_VERSION,
-  nextLocalId,
   normalizeTagNames,
   toIntegerOrZero,
   toStringOrEmpty,

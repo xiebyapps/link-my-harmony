@@ -247,13 +247,3 @@ export function consumePendingSharedIntent(): PendingSharedIntent {
   }
   return payload;
 }
-
-export function consumePendingSharedUrl(): string {
-  const current = pendingSharedUrl;
-  pendingSharedUrl = '';
-  pendingSharedTitle = '';
-  if (current.length > 0) {
-    console.info(`${SHARE_LOG_TAG}: consumed pending url=${current}`);
-  }
-  return current;
-}
