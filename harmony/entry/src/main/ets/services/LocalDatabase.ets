@@ -665,10 +665,7 @@ export class LocalDatabase {
 
     const hasMore: boolean = rows.length > limit;
     const page: Array<LinkRow> = hasMore ? rows.slice(0, limit) : rows;
-    const links: Array<LinkItem> = [];
-    for (let i: number = 0; i < page.length; i++) {
-      links.push(await this.hydrateLinkRow(page[i]));
-    }
+    const links: Array<LinkItem> = await this.hydrateLinkRows(page);
     const nextCursor: number = hasMore && page.length > 0 ? page[page.length - 1].id : -1;
     return { links, nextCursor };
   }
@@ -745,6 +742,115 @@ export class LocalDatabase {
       pinned: row.pinned,
       tags,
     };
+  }
+
+  /**
+   * Batch-hydrate multiple link rows with a single tags query and a single
+   * collections query instead of N×2 individual queries.
+   */
+  private async hydrateLinkRows(rows: Array<LinkRow>): Promise<Array<LinkItem>> {
+    if (rows.length === 0) {
+      return [];
+    }
+
+    // 1. Collect unique IDs
+    const linkIds: Array<number> = [];
+    const collectionIdSet = new Set<number>();
+    for (let i: number = 0; i < rows.length; i++) {
+      linkIds.push(rows[i].id);
+      if (rows[i].collectionId !== 0) {
+        collectionIdSet.add(rows[i].collectionId);
+      }
+    }
+
+    // 2. Batch-fetch all tags for these links
+    const tagsByLinkId = new Map<number, Array<LinkTag>>();
+    {
+      const placeholders: string = linkIds.map(() => '?').join(', ');
+      const rs = await this.requireStore().querySql(
+        `SELECT lt.link_id, t.id, t.name FROM ${TABLE_LINK_TAGS} lt` +
+        ` INNER JOIN ${TABLE_TAGS} t ON t.id = lt.tag_id` +
+        ` WHERE lt.link_id IN (${placeholders})`,
+        linkIds,
+      );
+      try {
+        while (rs.goToNextRow()) {
+          const linkId: number = rs.getLong(rs.getColumnIndex('link_id'));
+          const tag: LinkTag = {
+            id: rs.getLong(rs.getColumnIndex('id')),
+            name: rs.getString(rs.getColumnIndex('name')),
+          };
+          const existing = tagsByLinkId.get(linkId);
+          if (existing !== undefined) {
+            existing.push(tag);
+          } else {
+            tagsByLinkId.set(linkId, [tag]);
+          }
+        }
+      } finally {
+        rs.close();
+      }
+    }
+
+    // 3. Batch-fetch all collections
+    const collectionMap = new Map<number, CollectionRow>();
+    if (collectionIdSet.size > 0) {
+      const collectionIds: Array<number> = Array.from(collectionIdSet);
+      const placeholders: string = collectionIds.map(() => '?').join(', ');
+      const rs = await this.requireStore().querySql(
+        `SELECT id, owner_id, name, description, color, parent_id` +
+        ` FROM ${TABLE_COLLECTIONS} WHERE id IN (${placeholders})`,
+        collectionIds,
+      );
+      try {
+        while (rs.goToNextRow()) {
+          const col: CollectionRow = {
+            id: rs.getLong(rs.getColumnIndex('id')),
+            ownerId: rs.getLong(rs.getColumnIndex('owner_id')),
+            name: rs.getString(rs.getColumnIndex('name')),
+            description: rs.getString(rs.getColumnIndex('description')),
+            color: rs.getString(rs.getColumnIndex('color')),
+            parentId: rs.getLong(rs.getColumnIndex('parent_id')),
+          };
+          collectionMap.set(col.id, col);
+        }
+      } finally {
+        rs.close();
+      }
+    }
+
+    // 4. Assemble results
+    const result: Array<LinkItem> = [];
+    for (let i: number = 0; i < rows.length; i++) {
+      const row: LinkRow = rows[i];
+      const tags: Array<LinkTag> = tagsByLinkId.get(row.id) ?? [];
+      let collectionOwnerId: number = 0;
+      let collectionName: string = '';
+      let collectionColor: string = '';
+      if (row.collectionId !== 0) {
+        const col: CollectionRow | undefined = collectionMap.get(row.collectionId);
+        if (col !== undefined) {
+          collectionOwnerId = col.ownerId;
+          collectionName = col.name;
+          collectionColor = col.color;
+        }
+      }
+      result.push({
+        id: row.id,
+        name: row.name,
+        url: row.url,
+        description: row.description,
+        createdAt: row.createdAt,
+        collectionId: row.collectionId,
+        collectionOwnerId,
+        collectionName,
+        collectionColor,
+        pinned: row.pinned,
+        tags,
+      });
+    }
+
+    return result;
   }
 
   // --- export / import ----------------------------------------------------

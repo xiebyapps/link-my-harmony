@@ -1,44 +1,8 @@
+import { extractHostname } from './url-parser.mjs';
+
+export { extractHostname };
+
 const SCORE_HALF_LIFE_MS = 7 * 24 * 60 * 60 * 1000;
-
-const URL_PATTERN = /https?:\/\/[^\s]+/i;
-const URL_TRAILING_NOISE_PATTERN = /["'\]\[\)\(\}\{>,.;!?]+$/;
-
-export function extractHostname(raw) {
-  if (typeof raw !== 'string') {
-    return '';
-  }
-  const trimmed = raw.trim();
-  if (trimmed.length === 0) {
-    return '';
-  }
-  const matched = trimmed.match(URL_PATTERN);
-  if (!matched || !matched[0]) {
-    return '';
-  }
-  const cleaned = matched[0].replace(URL_TRAILING_NOISE_PATTERN, '');
-  const afterScheme = cleaned.slice(cleaned.indexOf('://') + 3);
-  const endIndex = findFirstIndex(afterScheme, ['/', '?', '#']);
-  const authority = endIndex >= 0 ? afterScheme.slice(0, endIndex) : afterScheme;
-  const hostWithPort = authority.includes('@') ? authority.slice(authority.indexOf('@') + 1) : authority;
-  const portIndex = hostWithPort.indexOf(':');
-  const host = portIndex >= 0 ? hostWithPort.slice(0, portIndex) : hostWithPort;
-  const lower = host.toLowerCase();
-  if (lower.length === 0) {
-    return '';
-  }
-  return lower.startsWith('www.') ? lower.slice(4) : lower;
-}
-
-function findFirstIndex(text, candidates) {
-  let best = -1;
-  for (const c of candidates) {
-    const idx = text.indexOf(c);
-    if (idx >= 0 && (best < 0 || idx < best)) {
-      best = idx;
-    }
-  }
-  return best;
-}
 
 export function createDefaultHostCollectionMemory() {
   return { entries: [] };

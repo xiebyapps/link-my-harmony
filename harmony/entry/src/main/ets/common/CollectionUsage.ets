@@ -1,3 +1,5 @@
+import { decayedScore, clampNonNegative } from './ScoredEntryList';
+
 export interface CollectionUsageEntry {
   collectionId: number;
   viewCount: number;
@@ -17,8 +19,6 @@ interface CollectionUsageEntryPayload {
   viewCount?: number;
   lastViewedAt?: number;
 }
-
-const SCORE_HALF_LIFE_MS: number = 7 * 24 * 60 * 60 * 1000;
 
 export function createDefaultCollectionUsage(): CollectionUsageState {
   return { entries: [] };
@@ -61,14 +61,7 @@ export function collectionUsageScore(
   if (entry === null) {
     return 0;
   }
-
-  const age: number = now - entry.lastViewedAt;
-  if (age <= 0) {
-    return entry.viewCount;
-  }
-
-  const decay: number = Math.pow(0.5, age / SCORE_HALF_LIFE_MS);
-  return entry.viewCount * decay;
+  return decayedScore(entry.viewCount, entry.lastViewedAt, now);
 }
 
 export function serializeCollectionUsage(state: CollectionUsageState): string {
@@ -101,8 +94,8 @@ export function parseCollectionUsage(raw: string): CollectionUsageState {
       ) {
         sanitized.push({
           collectionId,
-          viewCount: viewCount < 0 ? 0 : viewCount,
-          lastViewedAt: lastViewedAt < 0 ? 0 : lastViewedAt,
+          viewCount: clampNonNegative(viewCount),
+          lastViewedAt: clampNonNegative(lastViewedAt),
         });
       }
     }

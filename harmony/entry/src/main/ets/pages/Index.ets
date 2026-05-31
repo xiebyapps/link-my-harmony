@@ -1,8 +1,6 @@
 import type common from '@ohos.app.ability.common';
 import pasteboard from '@ohos.pasteboard';
 import picker from '@ohos.file.picker';
-import fs from '@ohos.file.fs';
-import util from '@ohos.util';
 import { emptyLinkItem, type LinkItem, type CollectionItem, type LinkTag } from '../common/Models';
 import type { DashboardTotals } from '../services/LinkwardenApi';
 import { BookmarkService } from '../services/BookmarkService';
@@ -36,15 +34,22 @@ import {
   type HostCollectionMemoryState,
 } from '../common/HostCollectionMemory';
 import { consumePendingSharedIntent } from '../common/ShareIntent';
+import { extractUrlAndTitle } from '../common/UrlParser';
+import { isNetworkError, formatSignInError } from '../common/SessionValidator';
+import {
+  parseTagsFromInput,
+  normalizedTagCandidate,
+  appendTagToInput,
+  toggleTagInInput,
+  tagsIncludingPendingQuery,
+  quickTagOptions,
+} from '../common/TagParser';
+import { writeFileSafe, readFileSafe } from '../common/FileUtils';
+import { matchedCollectionByQuery, collectionLabelForQuery } from '../common/CollectionMatcher';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
 type CollectionFormSource = 'add' | 'edit';
-
-interface ParsedLinkInput {
-  url: string;
-  title: string;
-}
 
 interface CollectionPreviewSection {
   collection: CollectionItem;
@@ -1158,7 +1163,7 @@ struct Index {
           .fontColor(this.primaryTextColor())
           .borderRadius(10);
 
-        if (this.normalizedTagCandidate(this.newTagPickerQuery).length > 0) {
+        if (normalizedTagCandidate(this.newTagPickerQuery).length > 0) {
           Button('＋')
             .fontSize(18)
             .width(40)
@@ -1168,7 +1173,7 @@ struct Index {
             .fontColor(this.tabActiveTextColor())
             .borderRadius(10)
             .onClick(() => {
-              this.newLinkTagsInput = this.appendTagToInput(this.newLinkTagsInput, this.newTagPickerQuery);
+              this.newLinkTagsInput = appendTagToInput(this.newLinkTagsInput, this.newTagPickerQuery);
               this.newTagPickerQuery = '';
             });
         }
@@ -1191,10 +1196,10 @@ struct Index {
       .width('100%')
       .alignItems(VerticalAlign.Center);
 
-      if (this.quickTagOptions(this.newTagPickerQuery, this.parsedDraftTags()).length > 0) {
+      if (quickTagOptions(this.newTagPickerQuery, this.parsedDraftTags(), this.uniqueTags()).length > 0) {
         Scroll() {
           Row({ space: 8 }) {
-            ForEach(this.quickTagOptions(this.newTagPickerQuery, this.parsedDraftTags()), (tag: string) => {
+            ForEach(quickTagOptions(this.newTagPickerQuery, this.parsedDraftTags(), this.uniqueTags()), (tag: string) => {
               this.TagChoiceChip(
                 tag,
                 this.parsedDraftTags().some((s: string) => s.toLowerCase() === tag.toLowerCase()),
@@ -1258,7 +1263,7 @@ struct Index {
           .backgroundColor(this.surfaceColor())
           .borderRadius(10);
 
-        if (this.normalizedTagCandidate(this.editTagPickerQuery).length > 0) {
+        if (normalizedTagCandidate(this.editTagPickerQuery).length > 0) {
           Button('＋')
             .fontSize(18)
             .width(40)
@@ -1268,7 +1273,7 @@ struct Index {
             .fontColor(this.tabActiveTextColor())
             .borderRadius(10)
             .onClick(() => {
-              this.editTagsInput = this.appendTagToInput(this.editTagsInput, this.editTagPickerQuery);
+              this.editTagsInput = appendTagToInput(this.editTagsInput, this.editTagPickerQuery);
               this.editTagPickerQuery = '';
             });
         }
@@ -1291,10 +1296,10 @@ struct Index {
       .width('100%')
       .alignItems(VerticalAlign.Center);
 
-      if (this.quickTagOptions(this.editTagPickerQuery, this.parsedEditTags()).length > 0) {
+      if (quickTagOptions(this.editTagPickerQuery, this.parsedEditTags(), this.uniqueTags()).length > 0) {
         Scroll() {
           Row({ space: 8 }) {
-            ForEach(this.quickTagOptions(this.editTagPickerQuery, this.parsedEditTags()), (tag: string) => {
+            ForEach(quickTagOptions(this.editTagPickerQuery, this.parsedEditTags(), this.uniqueTags()), (tag: string) => {
               this.TagChoiceChip(
                 tag,
                 this.parsedEditTags().some((s: string) => s.toLowerCase() === tag.toLowerCase()),
@@ -3230,7 +3235,7 @@ struct Index {
   private handleNewLinkUrlChange(value: string): void {
     this.newLinkUrl = value;
     if (!this.newLinkTitleEdited) {
-      this.newLinkTitle = this.extractUrlAndTitleFromInput(value).title;
+      this.newLinkTitle = extractUrlAndTitle(value).title;
     }
     this.maybeAutoPickCollection();
   }
@@ -3241,11 +3246,11 @@ struct Index {
   }
 
   private draftHasResolvedUrl(): boolean {
-    return this.extractUrlAndTitleFromInput(this.newLinkUrl).url.length > 0;
+    return extractUrlAndTitle(this.newLinkUrl).url.length > 0;
   }
 
   private detectedUrlSummaryText(): string {
-    const parsed = this.extractUrlAndTitleFromInput(this.newLinkUrl);
+    const parsed = extractUrlAndTitle(this.newLinkUrl);
     if (parsed.url.length === 0) {
       return 'No valid URL detected yet.';
     }
@@ -3253,27 +3258,8 @@ struct Index {
     return `Detected URL: ${parsed.url}`;
   }
 
-  private matchedCollectionByQuery(rawQuery: string): CollectionItem | null {
-    const query = rawQuery.trim().toLowerCase();
-    if (query.length === 0) {
-      return null;
-    }
-
-    const exactMatch = this.collections.find((item) => item.name.toLowerCase() === query);
-    if (exactMatch !== undefined) {
-      return exactMatch;
-    }
-
-    const partialMatches = this.collections.filter((item) => item.name.toLowerCase().indexOf(query) >= 0);
-    if (partialMatches.length === 1) {
-      return partialMatches[0];
-    }
-
-    return null;
-  }
-
   private matchedDraftCollection(): CollectionItem | null {
-    return this.matchedCollectionByQuery(this.newLinkCollectionQuery);
+    return matchedCollectionByQuery(this.collections, this.newLinkCollectionQuery);
   }
 
   private draftCollectionMatches(): Array<CollectionItem> {
@@ -3295,11 +3281,11 @@ struct Index {
   }
 
   private parsedDraftTags(): Array<string> {
-    return this.parseTagsFromInput(this.newLinkTagsInput);
+    return parseTagsFromInput(this.newLinkTagsInput);
   }
 
   private matchedEditCollection(): CollectionItem | null {
-    return this.matchedCollectionByQuery(this.editCollectionQuery);
+    return matchedCollectionByQuery(this.collections,this.editCollectionQuery);
   }
 
   private editCollectionMatches(): Array<CollectionItem> {
@@ -3312,7 +3298,7 @@ struct Index {
   }
 
   private matchedParentCollection(): CollectionItem | null {
-    return this.matchedCollectionByQuery(this.newCollectionParentQuery);
+    return matchedCollectionByQuery(this.collections,this.newCollectionParentQuery);
   }
 
   private detectedParentCollectionSummaryText(): string {
@@ -3334,7 +3320,7 @@ struct Index {
   }
 
   private parsedEditTags(): Array<string> {
-    return this.parseTagsFromInput(this.editTagsInput);
+    return parseTagsFromInput(this.editTagsInput);
   }
 
   private draftTagSummaryText(): string {
@@ -3346,137 +3332,23 @@ struct Index {
   }
 
   private resolvedDraftTags(): Array<string> {
-    return this.tagsIncludingPendingQuery(this.newLinkTagsInput, this.newTagPickerQuery);
+    return tagsIncludingPendingQuery(this.newLinkTagsInput, this.newTagPickerQuery);
   }
 
   private resolvedEditTags(): Array<string> {
-    return this.tagsIncludingPendingQuery(this.editTagsInput, this.editTagPickerQuery);
+    return tagsIncludingPendingQuery(this.editTagsInput, this.editTagPickerQuery);
   }
 
   private handleDraftTagToggle(tag: string): void {
-    this.newLinkTagsInput = this.toggleTagInInput(this.newLinkTagsInput, tag);
+    this.newLinkTagsInput = toggleTagInInput(this.newLinkTagsInput, tag);
   }
 
   private handleEditTagToggle(tag: string): void {
-    this.editTagsInput = this.toggleTagInInput(this.editTagsInput, tag);
-  }
-
-  private normalizedTagCandidate(rawValue: string): string {
-    return rawValue.trim().replace(/^#+/, '');
-  }
-
-  private normalizedTagsInput(tags: Array<string>): string {
-    return tags.join(', ');
-  }
-
-  private appendTagToInput(rawInput: string, rawTag: string): string {
-    const candidate = this.normalizedTagCandidate(rawTag);
-    if (candidate.length === 0) {
-      return rawInput;
-    }
-
-    const nextTags = this.parseTagsFromInput(rawInput);
-    const exists = nextTags.some((item) => item.toLowerCase() === candidate.toLowerCase());
-    if (!exists) {
-      nextTags.push(candidate);
-    }
-
-    return this.normalizedTagsInput(nextTags);
-  }
-
-  private removeTagFromInput(rawInput: string, rawTag: string): string {
-    const nextTags = this.parseTagsFromInput(rawInput)
-      .filter((item) => item.toLowerCase() !== rawTag.trim().toLowerCase());
-    return this.normalizedTagsInput(nextTags);
-  }
-
-  private toggleTagInInput(rawInput: string, rawTag: string): string {
-    const exists = this.parseTagsFromInput(rawInput)
-      .some((item) => item.toLowerCase() === rawTag.trim().toLowerCase());
-    return exists ? this.removeTagFromInput(rawInput, rawTag) : this.appendTagToInput(rawInput, rawTag);
-  }
-
-  private parseTagsFromInput(rawInput: string): Array<string> {
-    const rawItems = rawInput
-      .split(/[\n,]/)
-      .map((item) => this.normalizedTagCandidate(item))
-      .filter((item) => item.length > 0);
-    const deduped: Array<string> = [];
-
-    rawItems.forEach((item) => {
-      const exists = deduped.some((current) => current.toLowerCase() === item.toLowerCase());
-      if (!exists) {
-        deduped.push(item);
-      }
-    });
-
-    return deduped;
-  }
-
-  private tagsIncludingPendingQuery(rawInput: string, rawQuery: string): Array<string> {
-    const parsed = this.parseTagsFromInput(rawInput);
-    const candidate = this.normalizedTagCandidate(rawQuery);
-    if (candidate.length === 0) {
-      return parsed;
-    }
-
-    const exists = parsed.some((item) => item.toLowerCase() === candidate.toLowerCase());
-    if (!exists) {
-      parsed.push(candidate);
-    }
-
-    return parsed;
-  }
-
-  private canCreateTag(rawQuery: string, selectedTags: Array<string>): boolean {
-    const candidate = this.normalizedTagCandidate(rawQuery);
-    if (candidate.length === 0) {
-      return false;
-    }
-
-    const existsInSelected = selectedTags.some((tag) => tag.toLowerCase() === candidate.toLowerCase());
-    const existsInLibrary = this.uniqueTags().some((tag) => tag.toLowerCase() === candidate.toLowerCase());
-    return !existsInSelected && !existsInLibrary;
-  }
-
-  private pendingTagCandidate(rawQuery: string, selectedTags: Array<string>): string {
-    const candidate = this.normalizedTagCandidate(rawQuery);
-    if (candidate.length === 0) {
-      return '';
-    }
-
-    const existsInSelected = selectedTags.some((tag) => tag.toLowerCase() === candidate.toLowerCase());
-    return existsInSelected ? '' : candidate;
-  }
-
-  private quickTagOptions(rawQuery: string, selectedTags: Array<string>): Array<string> {
-    const query = this.normalizedTagCandidate(rawQuery).toLowerCase();
-    const options: Array<string> = [];
-
-    selectedTags.forEach((tag) => {
-      if (query.length === 0 || tag.toLowerCase().indexOf(query) >= 0) {
-        options.push(tag);
-      }
-    });
-
-    this.uniqueTags().forEach((tag) => {
-      const exists = options.some((item) => item.toLowerCase() === tag.toLowerCase());
-      if (!exists && (query.length === 0 || tag.toLowerCase().indexOf(query) >= 0)) {
-        options.push(tag);
-      }
-    });
-
-    return options;
+    this.editTagsInput = toggleTagInInput(this.editTagsInput, tag);
   }
 
   private collectionLabelForQuery(rawQuery: string): string {
-    const query = rawQuery.trim();
-    if (query.length === 0) {
-      return 'Unorganized';
-    }
-
-    const matched = this.matchedCollectionByQuery(query);
-    return matched === null ? query : matched.name;
+    return collectionLabelForQuery(this.collections, rawQuery);
   }
 
   private collectionHintForQuery(rawQuery: string): string {
@@ -3485,7 +3357,7 @@ struct Index {
       return 'No collection will be assigned.';
     }
 
-    const matched = this.matchedCollectionByQuery(query);
+    const matched = matchedCollectionByQuery(this.collections,query);
     if (matched !== null) {
       return matched.parentName.length > 0 ? `Inside ${matched.parentName}` : 'Existing collection';
     }
@@ -3506,7 +3378,7 @@ struct Index {
     const currentQuery = this.collectionPickerSource === 'add'
       ? this.newLinkCollectionQuery
       : this.editCollectionQuery;
-    const matched = this.matchedCollectionByQuery(currentQuery);
+    const matched = matchedCollectionByQuery(this.collections,currentQuery);
     if (matched !== null) {
       return matched.id;
     }
@@ -3592,7 +3464,7 @@ struct Index {
 
   private applyNewLinkDraft(url: string, title: string = ''): void {
     this.newLinkUrl = url;
-    this.newLinkTitle = title.length > 0 ? title : this.extractUrlAndTitleFromInput(url).title;
+    this.newLinkTitle = title.length > 0 ? title : extractUrlAndTitle(url).title;
     this.newLinkTitleEdited = false;
     this.newLinkCollectionQuery = '';
     this.newLinkTagsInput = '';
@@ -3636,7 +3508,7 @@ struct Index {
     if (this.newLinkCollectionQuery.trim().length > 0) {
       return;
     }
-    const urlCandidate = this.extractUrlAndTitleFromInput(this.newLinkUrl).url;
+    const urlCandidate = extractUrlAndTitle(this.newLinkUrl).url;
     const predictedId = this.predictCollectionForUrl(urlCandidate);
     if (predictedId === 0) {
       return;
@@ -3819,39 +3691,6 @@ struct Index {
     }
 
     return sorted;
-  }
-
-  private extractUrlAndTitleFromInput(rawInput: string): ParsedLinkInput {
-    const value = rawInput.trim();
-    if (value.length === 0) {
-      return { url: '', title: '' };
-    }
-
-    const urlPattern: RegExp = /https?:\/\/[^\s]+/i;
-    const hostPattern: RegExp = /([a-z0-9-]+\.)+[a-z]{2,}([/?#][^\s]*)?/i;
-    const trailingNoisePattern: RegExp = /["'\]\[\)\(\}\{>,.;!?]+$/;
-    const matchedUrl = value.match(urlPattern);
-
-    if (matchedUrl && matchedUrl.length > 0) {
-      const url = matchedUrl[0].replace(trailingNoisePattern, '');
-      const titleCandidate = value.replace(matchedUrl[0], '').trim().replace(/\s+/g, ' ');
-      return {
-        url,
-        title: titleCandidate.length > 200 ? titleCandidate.slice(0, 200) : titleCandidate,
-      };
-    }
-
-    const matchedHost = value.match(hostPattern);
-    if (matchedHost && matchedHost.length > 0) {
-      const rawHost = matchedHost[0].replace(trailingNoisePattern, '');
-      const titleCandidate = value.replace(matchedHost[0], '').trim().replace(/\s+/g, ' ');
-      return {
-        url: `https://${rawHost}`,
-        title: titleCandidate.length > 200 ? titleCandidate.slice(0, 200) : titleCandidate,
-      };
-    }
-
-    return { url: '', title: '' };
   }
 
   private tabActiveColor(): string {
@@ -4230,15 +4069,8 @@ struct Index {
         this.syncApiContext();
       }
       const message: string = this.formatError(error);
-      const looksNetworky: boolean = /REQUEST_|HTTP_5|timeout|network|ECONNREFUSED|EHOSTUNREACH|ENOTFOUND/i.test(message);
-      if (looksNetworky) {
-        this.setNotice(
-          `Sign in failed: ${message}. If the server is unreachable, tap "Use offline" to keep working on this device.`,
-          true,
-        );
-      } else {
-        this.setNotice(`Sign in failed: ${message}`, true);
-      }
+      const networkIssue: boolean = isNetworkError(message);
+      this.setNotice(formatSignInError(message, networkIssue), true);
     } finally {
       this.dashboardRefreshing = false;
       this.loading = false;
@@ -4333,55 +4165,12 @@ struct Index {
         return;
       }
       const uri: string = uris[0];
-      await this.writeFileSafe(uri, raw);
+      await writeFileSafe(uri, raw);
       this.setNotice(`Backup saved: ${uri}`, false);
     } catch (error) {
       this.setNotice(`Export failed: ${this.formatError(error)}`, true);
     } finally {
       this.exportingLocal = false;
-    }
-  }
-
-  /**
-   * Write a UTF-8 string to a file. Tries the fast path (direct string
-   * write) first; falls back to encoding into an ArrayBuffer if the SDK
-   * on this device rejects string content.
-   */
-  private async writeFileSafe(uri: string, content: string): Promise<void> {
-    const file = fs.openSync(uri, fs.OpenMode.READ_WRITE | fs.OpenMode.TRUNC);
-    try {
-      try {
-        fs.writeSync(file.fd, content);
-      } catch (stringWriteError) {
-        const encoder = new util.TextEncoder();
-        const bytes: Uint8Array = encoder.encodeInto(content);
-        fs.writeSync(file.fd, bytes.buffer);
-      }
-    } finally {
-      fs.closeSync(file);
-    }
-  }
-
-  /**
-   * Read a file as a UTF-8 string. Tries `fs.readTextSync` first; if that
-   * API is unavailable on this SDK, falls back to open + stat + read +
-   * TextDecoder.
-   */
-  private async readFileSafe(uri: string): Promise<string> {
-    try {
-      return fs.readTextSync(uri);
-    } catch (readTextError) {
-      const file = fs.openSync(uri, fs.OpenMode.READ_ONLY);
-      try {
-        const stat = fs.statSync(file.fd);
-        const size: number = stat.size;
-        const buffer: ArrayBuffer = new ArrayBuffer(size);
-        fs.readSync(file.fd, buffer);
-        const decoder = util.TextDecoder.create('utf-8');
-        return decoder.decodeToString(new Uint8Array(buffer));
-      } finally {
-        fs.closeSync(file);
-      }
     }
   }
 
@@ -4399,7 +4188,7 @@ struct Index {
         return;
       }
       const uri: string = selected[0];
-      const raw: string = await this.readFileSafe(uri);
+      const raw: string = await readFileSafe(uri);
       this.showImportPreview(raw, strategy, 'file');
     } catch (error) {
       this.setNotice(`Import failed: ${this.formatError(error)}`, true);
@@ -4647,7 +4436,7 @@ struct Index {
   }
 
   private async handleAddLink(): Promise<void> {
-    const parsedInput = this.extractUrlAndTitleFromInput(this.newLinkUrl);
+    const parsedInput = extractUrlAndTitle(this.newLinkUrl);
     if (parsedInput.url.length === 0) {
       this.setNotice('Please enter a URL.', true);
       return;

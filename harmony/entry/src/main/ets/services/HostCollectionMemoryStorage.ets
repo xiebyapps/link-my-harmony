@@ -1,29 +1,26 @@
-import preferences from '@ohos.data.preferences';
 import {
   parseHostCollectionMemory,
   serializeHostCollectionMemory,
   type HostCollectionMemoryState,
 } from '../common/HostCollectionMemory';
-
-const PREFERENCES_NAME: string = 'linkwarden.preferences';
-const MEMORY_KEY: string = 'host_collection_memory';
+import { PreferencesStore } from './PreferencesStore';
 
 export class HostCollectionMemoryStorage {
-  private context: Context;
+  private readonly store: PreferencesStore<HostCollectionMemoryState>;
 
   constructor(context: Context) {
-    this.context = context;
+    this.store = new PreferencesStore<HostCollectionMemoryState>(context, {
+      key: 'host_collection_memory',
+      serialize: serializeHostCollectionMemory,
+      parse: parseHostCollectionMemory,
+    });
   }
 
   async load(): Promise<HostCollectionMemoryState> {
-    const pref = await preferences.getPreferences(this.context, PREFERENCES_NAME);
-    const raw = await pref.get(MEMORY_KEY, '');
-    return parseHostCollectionMemory(typeof raw === 'string' ? raw : '');
+    return this.store.load();
   }
 
   async save(state: HostCollectionMemoryState): Promise<void> {
-    const pref = await preferences.getPreferences(this.context, PREFERENCES_NAME);
-    await pref.put(MEMORY_KEY, serializeHostCollectionMemory(state));
-    await pref.flush();
+    return this.store.save(state);
   }
 }

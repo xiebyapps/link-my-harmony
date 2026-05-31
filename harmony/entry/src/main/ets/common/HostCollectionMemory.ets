@@ -1,3 +1,6 @@
+import { extractHostname } from './UrlParser';
+import { decayedScore, clampNonNegative } from './ScoredEntryList';
+
 export interface HostCollectionEntry {
   host: string;
   collectionId: number;
@@ -18,49 +21,6 @@ interface HostCollectionEntryPayload {
   collectionId?: number;
   count?: number;
   lastUsedAt?: number;
-}
-
-const SCORE_HALF_LIFE_MS: number = 7 * 24 * 60 * 60 * 1000;
-const URL_PATTERN: RegExp = /https?:\/\/[^\s]+/i;
-const URL_TRAILING_NOISE_PATTERN: RegExp = /["'\]\[\)\(\}\{>,.;!?]+$/;
-
-export function extractHostname(raw: string): string {
-  const trimmed: string = raw.trim();
-  if (trimmed.length === 0) {
-    return '';
-  }
-  const matched = trimmed.match(URL_PATTERN);
-  if (matched === null || matched.length === 0) {
-    return '';
-  }
-  const cleaned: string = matched[0].replace(URL_TRAILING_NOISE_PATTERN, '');
-  const schemeIndex: number = cleaned.indexOf('://');
-  if (schemeIndex < 0) {
-    return '';
-  }
-  const afterScheme: string = cleaned.slice(schemeIndex + 3);
-  const endIndex: number = findFirstIndex(afterScheme, ['/', '?', '#']);
-  const authority: string = endIndex >= 0 ? afterScheme.slice(0, endIndex) : afterScheme;
-  const atIndex: number = authority.indexOf('@');
-  const hostWithPort: string = atIndex >= 0 ? authority.slice(atIndex + 1) : authority;
-  const portIndex: number = hostWithPort.indexOf(':');
-  const host: string = portIndex >= 0 ? hostWithPort.slice(0, portIndex) : hostWithPort;
-  const lower: string = host.toLowerCase();
-  if (lower.length === 0) {
-    return '';
-  }
-  return lower.startsWith('www.') ? lower.slice(4) : lower;
-}
-
-function findFirstIndex(text: string, candidates: Array<string>): number {
-  let best: number = -1;
-  for (let i: number = 0; i < candidates.length; i++) {
-    const idx: number = text.indexOf(candidates[i]);
-    if (idx >= 0 && (best < 0 || idx < best)) {
-      best = idx;
-    }
-  }
-  return best;
 }
 
 export function createDefaultHostCollectionMemory(): HostCollectionMemoryState {
@@ -112,12 +72,7 @@ export function hostCollectionScore(
   if (entry === null) {
     return 0;
   }
-  const age: number = now - entry.lastUsedAt;
-  if (age <= 0) {
-    return entry.count;
-  }
-  const decay: number = Math.pow(0.5, age / SCORE_HALF_LIFE_MS);
-  return entry.count * decay;
+  return decayedScore(entry.count, entry.lastUsedAt, now);
 }
 
 export function pickBestCollectionForHost(
@@ -179,8 +134,8 @@ export function parseHostCollectionMemory(raw: string): HostCollectionMemoryStat
         sanitized.push({
           host,
           collectionId,
-          count: count < 0 ? 0 : count,
-          lastUsedAt: lastUsedAt < 0 ? 0 : lastUsedAt,
+          count: clampNonNegative(count),
+          lastUsedAt: clampNonNegative(lastUsedAt),
         });
       }
     }

@@ -1,21 +1,7 @@
-const URL_PATTERN = /https?:\/\/[^\s]+/i;
-const HOST_PATTERN = /^([a-z0-9-]+\.)+[a-z]{2,}([/?#].*)?$/i;
-const URL_TRAILING_NOISE_PATTERN = /["'\]\[\)\(\}\{>,.;!?]+$/;
+import { URL_PATTERN, HOST_PATTERN, URL_TRAILING_NOISE_PATTERN, normalizeUrl } from './url-parser.mjs';
 
 function normalizeSharedUrl(raw, allowHostFallback = true) {
-  const text = typeof raw === 'string' ? raw.trim() : '';
-  if (!text) return '';
-
-  const urlMatch = text.match(URL_PATTERN);
-  if (urlMatch && urlMatch[0]) {
-    return urlMatch[0].replace(URL_TRAILING_NOISE_PATTERN, '');
-  }
-
-  if (allowHostFallback && HOST_PATTERN.test(text)) {
-    return `https://${text}`;
-  }
-
-  return '';
+  return normalizeUrl(raw, allowHostFallback);
 }
 
 function readStringValue(value) {

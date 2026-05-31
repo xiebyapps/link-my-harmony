@@ -1,8 +1,6 @@
 import Want from '@ohos.app.ability.Want';
+import { normalizeUrl } from './UrlParser';
 
-const URL_PATTERN: RegExp = /https?:\/\/[^\s]+/i;
-const HOST_PATTERN: RegExp = /^([a-z0-9-]+\.)+[a-z]{2,}([/?#].*)?$/i;
-const URL_TRAILING_NOISE_PATTERN: RegExp = /["'\]\[\)\(\}\{>,.;!?]+$/;
 const SHARE_LOG_TAG: string = 'ShareIntent';
 
 let pendingSharedUrl: string = '';
@@ -76,21 +74,7 @@ function extractUrlFromUnknownValue(value: Object | undefined, allowHostFallback
 }
 
 function normalizeSharedUrl(raw: string, allowHostFallback: boolean = true): string {
-  const value = raw.trim();
-  if (value.length === 0) {
-    return '';
-  }
-
-  const matched = value.match(URL_PATTERN);
-  if (matched && matched.length > 0) {
-    return matched[0].replace(URL_TRAILING_NOISE_PATTERN, '');
-  }
-
-  if (allowHostFallback && HOST_PATTERN.test(value)) {
-    return `https://${value}`;
-  }
-
-  return '';
+  return normalizeUrl(raw, allowHostFallback);
 }
 
 function normalizeSharedTitle(raw: string): string {

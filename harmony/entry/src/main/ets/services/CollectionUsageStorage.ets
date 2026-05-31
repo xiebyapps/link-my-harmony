@@ -1,29 +1,26 @@
-import preferences from '@ohos.data.preferences';
 import {
   parseCollectionUsage,
   serializeCollectionUsage,
   type CollectionUsageState,
 } from '../common/CollectionUsage';
-
-const PREFERENCES_NAME: string = 'linkwarden.preferences';
-const USAGE_KEY: string = 'collection_usage';
+import { PreferencesStore } from './PreferencesStore';
 
 export class CollectionUsageStorage {
-  private context: Context;
+  private readonly store: PreferencesStore<CollectionUsageState>;
 
   constructor(context: Context) {
-    this.context = context;
+    this.store = new PreferencesStore<CollectionUsageState>(context, {
+      key: 'collection_usage',
+      serialize: serializeCollectionUsage,
+      parse: parseCollectionUsage,
+    });
   }
 
   async load(): Promise<CollectionUsageState> {
-    const pref = await preferences.getPreferences(this.context, PREFERENCES_NAME);
-    const raw = await pref.get(USAGE_KEY, '');
-    return parseCollectionUsage(typeof raw === 'string' ? raw : '');
+    return this.store.load();
   }
 
   async save(state: CollectionUsageState): Promise<void> {
-    const pref = await preferences.getPreferences(this.context, PREFERENCES_NAME);
-    await pref.put(USAGE_KEY, serializeCollectionUsage(state));
-    await pref.flush();
+    return this.store.save(state);
   }
 }
