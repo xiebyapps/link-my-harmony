@@ -51,6 +51,7 @@ import { ThemePickerComponent } from '../components/ThemePickerComponent';
 import { DashboardPanelComponent, type DashboardPanelCallbacks, type CollectionPreviewSection } from '../components/DashboardPanelComponent';
 import { SearchPanelComponent, type SearchPanelCallbacks } from '../components/SearchPanelComponent';
 import { EditLinkOverlayComponent, type EditLinkOverlayCallbacks } from '../components/EditLinkOverlayComponent';
+import { AddLinkOverlayComponent, type AddLinkOverlayCallbacks } from '../components/AddLinkOverlayComponent';
 
 type ElementsView = 'links' | 'collections' | 'tags';
 type ActiveModal = 'none' | 'add' | 'edit' | 'collection' | 'collection-picker';
@@ -292,7 +293,20 @@ struct Index {
       });
 
       if (this.activeModal === 'add') {
-        this.AddLinkOverlay();
+        AddLinkOverlayComponent({
+          visible: this.activeModal === 'add',
+          loading: this.loading,
+          newLinkUrl: this.newLinkUrl,
+          newLinkTitle: this.newLinkTitle,
+          newLinkCollectionQuery: this.newLinkCollectionQuery,
+          newLinkTagsInput: this.newLinkTagsInput,
+          newTagPickerQuery: this.newTagPickerQuery,
+          collections: this.collections,
+          knownTagNames: this.knownTagNames,
+          themeMode: this.themeMode,
+          deviceDarkMode: this.deviceDarkMode,
+          callbacks: this.addLinkCallbacks(),
+        });
       }
 
       if (this.activeModal === 'edit') {
@@ -984,239 +998,9 @@ struct Index {
     });
   }
 
-  @Builder
-  private AddLinkComposer() {
-    Column({ space: 16 }) {
-      Column({ space: 12 }) {
-        Text('Link')
-          .fontSize(13)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-
-        TextInput({ placeholder: 'Paste a URL or text containing a URL', text: this.newLinkUrl })
-          .onChange((value: string) => {
-            this.handleNewLinkUrlChange(value);
-          })
-          .backgroundColor(this.surfaceColor())
-          .fontColor(this.primaryTextColor())
-          .borderRadius(10)
-          .width('100%');
-
-        if (this.newLinkUrl.trim().length > 0) {
-          Text(this.detectedUrlSummaryText())
-            .fontSize(12)
-            .fontColor(this.draftHasResolvedUrl() ? this.secondaryTextColor() : this.dangerColor())
-            .width('100%')
-            .textAlign(TextAlign.Start);
-        }
-
-        TextInput({ placeholder: 'Title (optional)', text: this.newLinkTitle })
-          .onChange((value: string) => {
-            this.handleNewLinkTitleChange(value);
-          })
-          .backgroundColor(this.surfaceColor())
-          .fontColor(this.primaryTextColor())
-          .borderRadius(10)
-          .width('100%');
-      }
-      .padding(16)
-      .backgroundColor(this.cardColor())
-      .borderRadius(16)
-      .width('100%');
-
-      Column({ space: 12 }) {
-        Text('Collection')
-          .fontSize(13)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-
-        this.CollectionPickerTrigger(
-          this.collectionLabelForQuery(this.newLinkCollectionQuery),
-          this.collectionHintForQuery(this.newLinkCollectionQuery),
-          () => {
-            this.openCollectionPicker('add');
-          }
-        );
-      }
-      .padding(16)
-      .backgroundColor(this.cardColor())
-      .borderRadius(16)
-      .width('100%');
-
-      this.DraftTagEditor();
-
-      Button(this.loading ? 'Adding...' : 'Add Link')
-        .width('100%')
-        .height(52)
-        .fontSize(16)
-        .fontWeight(FontWeight.Medium)
-        .backgroundColor(this.primaryActionBackgroundColor())
-        .fontColor(this.primaryActionTextColor())
-        .borderRadius(16)
-        .border({ width: 1, color: this.accentColor() })
-        .shadow({ radius: 14, color: this.primaryActionShadowColor(), offsetX: 0, offsetY: 8 })
-        .enabled(!this.loading)
-        .onClick(() => {
-          this.handleAddLink();
-        });
-    }
-    .width('100%');
-  }
-
-  @Builder
-  private CollectionPickerTrigger(value: string, hint: string, onClick: () => void) {
-    Row({ space: 12 }) {
-      Text('📁')
-        .fontSize(18);
-
-      Column({ space: 3 }) {
-        Text(value)
-          .fontSize(15)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.primaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-
-        Text(hint)
-          .fontSize(12)
-          .fontColor(this.secondaryTextColor())
-          .width('100%')
-          .textAlign(TextAlign.Start);
-      }
-      .layoutWeight(1)
-      .alignItems(HorizontalAlign.Start);
-
-      Text('›')
-        .fontSize(24)
-        .fontColor(this.secondaryTextColor())
-        .fontWeight(FontWeight.Lighter);
-    }
-    .padding({ left: 14, right: 14, top: 12, bottom: 12 })
-    .borderRadius(12)
-    .backgroundColor(this.surfaceColor())
-    .width('100%')
-    .onClick(onClick);
-  }
-
-  @Builder
-  private DraftTagEditor() {
-    Column({ space: 10 }) {
-      Text($r('app.string.tab_tags'))
-        .fontSize(13)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(this.secondaryTextColor())
-        .width('100%')
-        .textAlign(TextAlign.Start);
-
-      if (this.parsedDraftTags().length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(this.parsedDraftTags(), (tag: string) => {
-              this.TagChoiceChip(tag, true, () => {
-                this.handleDraftTagToggle(tag);
-              });
-            }, (tag: string) => `draft-sel-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-
-        Row()
-          .width('100%')
-          .height(1)
-          .backgroundColor(this.secondaryTextColor())
-          .opacity(0.12);
-      }
-
-      Row({ space: 10 }) {
-        TextInput({ placeholder: 'Search or create tag…', text: this.newTagPickerQuery })
-          .onChange((value: string) => {
-            this.newTagPickerQuery = value;
-          })
-          .layoutWeight(1)
-          .backgroundColor(this.surfaceColor())
-          .fontColor(this.primaryTextColor())
-          .borderRadius(10);
-
-        if (normalizedTagCandidate(this.newTagPickerQuery).length > 0) {
-          Button('＋')
-            .fontSize(18)
-            .width(40)
-            .height(40)
-            .padding(0)
-            .backgroundColor(this.tabActiveColor())
-            .fontColor(this.tabActiveTextColor())
-            .borderRadius(10)
-            .onClick(() => {
-              this.newLinkTagsInput = appendTagToInput(this.newLinkTagsInput, this.newTagPickerQuery);
-              this.newTagPickerQuery = '';
-            });
-        }
-
-        if (this.parsedDraftTags().length > 0) {
-          Button('✕')
-            .fontSize(13)
-            .width(34)
-            .height(40)
-            .padding(0)
-            .backgroundColor('transparent')
-            .fontColor(this.dangerColor())
-            .borderRadius(10)
-            .onClick(() => {
-              this.newLinkTagsInput = '';
-              this.newTagPickerQuery = '';
-            });
-        }
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center);
-
-      if (quickTagOptions(this.newTagPickerQuery, this.parsedDraftTags(), this.uniqueTags()).length > 0) {
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(quickTagOptions(this.newTagPickerQuery, this.parsedDraftTags(), this.uniqueTags()), (tag: string) => {
-              this.TagChoiceChip(
-                tag,
-                this.parsedDraftTags().some((s: string) => s.toLowerCase() === tag.toLowerCase()),
-                () => {
-                  this.handleDraftTagToggle(tag);
-                }
-              );
-            }, (tag: string) => `draft-opt-${tag}`);
-          }
-          .alignItems(VerticalAlign.Center);
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%');
-      }
-    }
-    .padding(16)
-    .backgroundColor(this.cardColor())
-    .borderRadius(16)
-    .width('100%');
-  }
 
 
-  @Builder
-  private TagChoiceChip(tag: string, selected: boolean, onClick: () => void) {
-    Button(`#${tag}`)
-      .fontSize(13)
-      .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
-      .fontColor(selected ? this.tabActiveTextColor() : this.primaryTextColor())
-      .backgroundColor(selected ? this.tabActiveColor() : this.surfaceColor())
-      .borderRadius(999)
-      .padding({ left: 14, right: 14, top: 8, bottom: 8 })
-      .height(40)
-      .margin({ right: 8 })
-      .onClick(onClick);
-  }
+
 
 
   @Builder
@@ -1438,75 +1222,6 @@ struct Index {
     });
   }
 
-  @Builder
-  private AddLinkOverlay() {
-    Stack({ alignContent: Alignment.Bottom }) {
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor('#66000000')
-        .opacity(this.activeModal === 'add' ? 1 : 0)
-        .animation({ duration: 250, curve: Curve.EaseOut })
-        .onClick(() => {
-          this.closeCurrentModal();
-        });
-
-      Column() {
-        Row()
-          .width(44)
-          .height(4)
-          .borderRadius(999)
-          .backgroundColor(this.secondaryTextColor())
-          .opacity(0.25)
-          .alignSelf(ItemAlign.Center)
-          .margin({ top: 12, bottom: 6 });
-
-        Row() {
-          Text('Add Link')
-            .fontSize(20)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(this.primaryTextColor())
-            .layoutWeight(1)
-            .textAlign(TextAlign.Start);
-
-          Button('✕')
-            .fontSize(15)
-            .width(34)
-            .height(34)
-            .backgroundColor(this.cardColor())
-            .fontColor(this.secondaryTextColor())
-            .borderRadius(999)
-            .padding(0)
-            .onClick(() => {
-              this.closeCurrentModal();
-            });
-        }
-        .width('100%')
-        .alignItems(VerticalAlign.Center)
-        .margin({ bottom: 16 });
-
-        Scroll() {
-          Column({ space: 16 }) {
-            this.AddLinkComposer();
-          }
-          .width('100%')
-          .padding({ bottom: 24 });
-        }
-        .width('100%')
-        .scrollBar(BarState.Off);
-      }
-      .onClick(() => {})
-      .width('100%')
-      .padding({ left: 16, right: 16 })
-      .backgroundColor(this.surfaceColor())
-      .borderRadius({ topLeft: 24, topRight: 24 })
-      .constraintSize({ maxHeight: '92%' })
-      .translate({ y: this.activeModal === 'add' ? 0 : 200 })
-      .animation({ duration: 200, curve: Curve.FastOutSlowIn });
-    }
-    .width('100%')
-    .height('100%');
-  }
 
   @Builder
   private CollectionOverlay() {
@@ -2530,6 +2245,20 @@ struct Index {
 
   private isThemeOptionSelected(mode: ThemeMode): boolean {
     return this.themeMode === mode;
+  }
+
+  private addLinkCallbacks(): AddLinkOverlayCallbacks {
+    return {
+      onClose: () => this.closeCurrentModal(),
+      onAdd: () => this.handleAddLink(),
+      onOpenCollectionPicker: () => this.openCollectionPicker('add'),
+      onUrlChange: (v: string) => this.handleNewLinkUrlChange(v),
+      onTitleChange: (v: string) => this.handleNewLinkTitleChange(v),
+      onCollectionQueryChange: (v: string) => { this.newLinkCollectionQuery = v; },
+      onTagsInputChange: (v: string) => { this.newLinkTagsInput = v; },
+      onTagPickerQueryChange: (v: string) => { this.newTagPickerQuery = v; },
+      onTagToggle: (tag: string) => this.handleDraftTagToggle(tag),
+    };
   }
 
   private editLinkCallbacks(): EditLinkOverlayCallbacks {
