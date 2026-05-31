@@ -185,7 +185,6 @@ struct Index {
   private searchDebounceTimer: number = -1;
 
   aboutToAppear(): void {
-    hilog.info(DOMAIN, TAG, 'aboutToAppear');
     if (this.hasRestoredSession) {
       this.startSharePolling();
       return;
@@ -203,7 +202,6 @@ struct Index {
     if (this.sharePollTimer >= 0) {
       clearInterval(this.sharePollTimer);
       this.sharePollTimer = -1;
-      hilog.info(DOMAIN, TAG, 'share poll stopped');
     }
 
     if (this.noticeTimer >= 0) {
@@ -218,7 +216,6 @@ struct Index {
   }
 
   onPageShow(): void {
-    hilog.info(DOMAIN, TAG, 'onPageShow restoring=%{public}s', String(this.restoring));
     if (this.restoring) {
       return;
     }
@@ -2714,7 +2711,7 @@ struct Index {
     try {
       return await this.service.fetchTags();
     } catch (error) {
-      hilog.info(DOMAIN, TAG, 'fetchTags failed: %{public}s', this.formatError(error));
+      hilog.warn(DOMAIN, TAG, 'fetchTags failed: %{public}s', this.formatError(error));
       return [];
     }
   }
@@ -2723,7 +2720,7 @@ struct Index {
     try {
       return await this.service.fetchDashboardTotals();
     } catch (error) {
-      hilog.info(DOMAIN, TAG, 'fetchDashboardTotals failed: %{public}s', this.formatError(error));
+      hilog.warn(DOMAIN, TAG, 'fetchDashboardTotals failed: %{public}s', this.formatError(error));
       return null;
     }
   }
@@ -2821,7 +2818,6 @@ struct Index {
         this.setNotice(`Share polling failed: ${this.formatError(error)}`, true);
       });
     }, 1200);
-    hilog.info(DOMAIN, TAG, 'share poll started');
   }
 
   private async consumeSharedUrlAndMaybeSave(): Promise<void> {
@@ -2831,12 +2827,10 @@ struct Index {
     if (sharedUrl.length === 0) {
       return;
     }
-    hilog.info(DOMAIN, TAG, 'consumeSharedUrlAndMaybeSave: got sharedUrl');
 
     this.applyNewLinkDraft(sharedUrl, sharedTitle);
 
     if (this.token.length === 0 && this.sessionMode !== 'offline') {
-      hilog.info(DOMAIN, TAG, 'shared url captured but no token and not offline');
       this.setNotice('Shared URL captured. Sign in or tap "Use offline" to save it.', false);
       return;
     }

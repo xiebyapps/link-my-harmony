@@ -10,24 +10,12 @@ const TAG = 'Folio';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want): void {
-    hilog.info(DOMAIN, TAG, 'onCreate action=%{public}s uri=%{public}s', want?.action ?? '', want?.uri ?? '');
-    const url = captureSharedUrlFromWant(want);
-    if (url.length > 0) {
-      hilog.info(DOMAIN, TAG, 'Captured shared URL in onCreate: %{public}s', url);
-    } else {
-      hilog.info(DOMAIN, TAG, 'No shared URL extracted in onCreate');
-    }
+    captureSharedUrlFromWant(want);
     this.syncSystemColorMode(this.context?.config?.colorMode);
   }
 
   onNewWant(want: Want): void {
-    hilog.info(DOMAIN, TAG, 'onNewWant action=%{public}s uri=%{public}s', want?.action ?? '', want?.uri ?? '');
-    const url = captureSharedUrlFromWant(want);
-    if (url.length > 0) {
-      hilog.info(DOMAIN, TAG, 'Captured shared URL in onNewWant: %{public}s', url);
-    } else {
-      hilog.info(DOMAIN, TAG, 'No shared URL extracted in onNewWant');
-    }
+    captureSharedUrlFromWant(want);
   }
 
   onConfigurationUpdate(config: Configuration): void {
