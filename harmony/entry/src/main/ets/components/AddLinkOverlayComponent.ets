@@ -95,7 +95,7 @@ export struct AddLinkOverlayComponent {
           Button() {
             SymbolGlyph($r('sys.symbol.xmark'))
               .fontSize(15)
-              .fontColor(this.palette().textSecondary);
+              .fontColor([this.palette().textSecondary]);
           }
             .width(34)
             .height(34)
@@ -164,7 +164,7 @@ export struct AddLinkOverlayComponent {
               Row({ space: 12 }) {
                 SymbolGlyph($r('sys.symbol.folder'))
                   .fontSize(18)
-                  .fontColor(this.palette().accent);
+                  .fontColor([this.palette().accent]);
 
                 Column({ space: 3 }) {
                   Text(this.matchedCollection() !== undefined
@@ -189,7 +189,7 @@ export struct AddLinkOverlayComponent {
 
                 SymbolGlyph($r('sys.symbol.chevron_right'))
                   .fontSize(18)
-                  .fontColor(this.palette().textSecondary);
+                  .fontColor([this.palette().textSecondary]);
               }
               .padding({ left: 14, right: 14, top: 12, bottom: 12 })
               .borderRadius(12)

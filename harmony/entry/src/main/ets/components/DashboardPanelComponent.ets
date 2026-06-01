@@ -50,6 +50,10 @@ export struct DashboardPanelComponent {
     return `${n}`;
   }
 
+  private res(key: Resource): string {
+    return this.getUIContext().getHostContext()!.resourceManager.getStringSync(key);
+  }
+
   build() {
     Column({ space: 10 }) {
       // Shortcut cards
@@ -78,7 +82,7 @@ export struct DashboardPanelComponent {
 
       // Pinned links strip
       this.LinkStripSection(
-        '📌 ' + $r('app.string.title_pinned_links'),
+        '📌 ' + this.res($r('app.string.title_pinned_links')),
         this.pinnedLinks.slice(0, 10),
         $r('app.string.msg_no_pinned_links'),
         () => { this.callbacks.onNavigatePinnedLinks(); }
@@ -86,7 +90,7 @@ export struct DashboardPanelComponent {
 
       // Recent links strip
       this.LinkStripSection(
-        '🕘 ' + $r('app.string.title_recent_links'),
+        '🕘 ' + this.res($r('app.string.title_recent_links')),
         this.dashboardLinks.slice(0, 10),
         this.dashboardLoading && this.dashboardLinks.length === 0 ? $r('app.string.msg_loading_dashboard') : $r('app.string.msg_no_recent_links'),
         () => { this.callbacks.onNavigateRecentLinks(); }
@@ -113,13 +117,12 @@ export struct DashboardPanelComponent {
   }
 
   @Builder
-  private ShortcutCard(title: string, iconKey: string, value: string, onClick: () => void) {
+  private ShortcutCard(title: string | Resource, iconKey: string, value: string, onClick: () => void) {
     Row({ space: 10 }) {
       SymbolGlyph($r('sys.symbol.' + iconKey))
         .fontSize(20)
         .width(28)
-        .fontColor(this.palette().textPrimary)
-        .textAlign(TextAlign.Center);
+        .fontColor([this.palette().textPrimary]);
 
       Column({ space: 2 }) {
         Text(title)
@@ -148,7 +151,7 @@ export struct DashboardPanelComponent {
   }
 
   @Builder
-  private LinkStripSection(title: string, items: Array<LinkItem>, emptyText: string, onNavigate: () => void) {
+  private LinkStripSection(title: string | Resource, items: Array<LinkItem>, emptyText: string | Resource, onNavigate: () => void) {
     Column({ space: 8 }) {
       this.SectionTitle(title, onNavigate);
 
@@ -181,7 +184,7 @@ export struct DashboardPanelComponent {
   }
 
   @Builder
-  private SectionTitle(title: string, onClick: () => void) {
+  private SectionTitle(title: string | Resource, onClick: () => void) {
     Row({ space: 8 }) {
       Text(title)
         .fontSize(16)
@@ -222,7 +225,7 @@ export struct DashboardPanelComponent {
         if (item.pinned) {
           SymbolGlyph($r('sys.symbol.pin_fill'))
             .fontSize(11)
-            .fontColor(this.palette().accent);
+            .fontColor([this.palette().accent]);
         }
       }
       .width('100%');

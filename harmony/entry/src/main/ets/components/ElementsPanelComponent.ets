@@ -150,9 +150,8 @@ export struct ElementsPanelComponent {
         Button() {
           SymbolGlyph($r('sys.symbol.plus'))
             .fontSize(20)
-            .fontColor(this.palette().accentText)
-            .width('100%')
-            .textAlign(TextAlign.Center);
+            .fontColor([this.palette().accentText])
+            .width('100%');
         }
         .width(40)
         .height(40)
@@ -172,7 +171,7 @@ export struct ElementsPanelComponent {
           if (this.showPinnedOnly) {
             SymbolGlyph($r('sys.symbol.pin_fill'))
               .fontSize(12)
-              .fontColor(this.palette().accentText);
+              .fontColor([this.palette().accentText]);
           }
           Text(this.showPinnedOnly ? $r('app.string.title_filter_pinned') : $r('app.string.title_filter_all'))
             .fontSize(12)
@@ -205,7 +204,7 @@ export struct ElementsPanelComponent {
         Row({ space: 6 }) {
           SymbolGlyph($r('sys.symbol.folder'))
             .fontSize(12)
-            .fontColor(this.palette().accentText);
+            .fontColor([this.palette().accentText]);
           Text(this.activeCollectionName)
             .fontSize(12)
             .fontWeight(FontWeight.Medium)
@@ -215,7 +214,7 @@ export struct ElementsPanelComponent {
             .layoutWeight(1);
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(12)
-            .fontColor(this.palette().accentText)
+            .fontColor([this.palette().accentText])
             .onClick(() => {
               this.callbacks.onCollectionFilterClear();
             });
@@ -373,7 +372,7 @@ export struct ElementsPanelComponent {
         if (item.pinned) {
           SymbolGlyph($r('sys.symbol.pin_fill'))
             .fontSize(13)
-            .fontColor(this.palette().accent);
+            .fontColor([this.palette().accent]);
         }
       }
       .width('100%')

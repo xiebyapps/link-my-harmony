@@ -19,12 +19,11 @@ fi
 
 "$NODE" "$HVIGOR" \
   --mode module \
-  -p module=entry@default \
   -p product=default \
-  -p requiredDeviceType=phone \
   assembleHap \
   --analyze=normal \
   --parallel \
+  --incremental \
   --daemon
 
 echo "✅ Build succeeded."

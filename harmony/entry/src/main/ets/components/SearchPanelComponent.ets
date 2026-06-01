@@ -148,7 +148,7 @@ export struct SearchPanelComponent {
   }
 
   @Builder
-  private ResultGroup(title: string, total: number) {
+  private ResultGroup(title: string | Resource, total: number) {
     Row({ space: 8 }) {
       Text(title)
         .fontSize(16)
@@ -177,7 +177,7 @@ export struct SearchPanelComponent {
         if (item.pinned) {
           SymbolGlyph($r('sys.symbol.pin_fill'))
             .fontSize(13)
-            .fontColor(this.palette().accent);
+            .fontColor([this.palette().accent]);
         }
       }
       .width('100%')

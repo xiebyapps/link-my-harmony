@@ -80,14 +80,14 @@ export struct SettingsPanelComponent {
     return `${n}`;
   }
 
-  private res(key: string): string {
-    return getUIContext().getHostContext().resourceManager.getStringSync(key);
+  private res(key: Resource): string {
+    return this.getUIContext().getHostContext()!.resourceManager.getStringSync(key);
   }
 
   private themeModeLabel(): string {
-    if (this.themeMode === 'system') return this.res('theme_system');
-    if (this.themeMode === 'dark') return this.res('theme_dark');
-    return this.res('theme_light');
+    if (this.themeMode === 'system') return this.res($r('app.string.theme_system'));
+    if (this.themeMode === 'dark') return this.res($r('app.string.theme_dark'));
+    return this.res($r('app.string.theme_light'));
   }
 
   build() {
@@ -115,9 +115,9 @@ export struct SettingsPanelComponent {
 
         // Stats
         Row({ space: 8 }) {
-          this.StatTile(this.formatCount(this.linksTotal), $r('app.string.tab_links'));
-          this.StatTile(this.formatCount(this.tagsTotal), $r('app.string.tab_tags'));
-          this.StatTile(this.formatCount(this.pinnedTotal), $r('app.string.btn_pinned'));
+          this.StatTile(this.formatCount(this.linksTotal), this.res($r('app.string.tab_links')));
+          this.StatTile(this.formatCount(this.tagsTotal), this.res($r('app.string.tab_tags')));
+          this.StatTile(this.formatCount(this.pinnedTotal), this.res($r('app.string.btn_pinned')));
         }
         .width('100%');
 
