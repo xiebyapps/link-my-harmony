@@ -64,3 +64,7 @@ service-account-file.json
 .agents/
 .hivigor/
 docs/
+
+# HarmonyOS build
+.hvigor/
+**/build-logs/
