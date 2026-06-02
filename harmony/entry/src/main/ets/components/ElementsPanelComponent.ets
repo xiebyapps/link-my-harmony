@@ -5,6 +5,37 @@ import type { LinkItem, CollectionItem } from '../common/Models';
 import type { ThemeMode } from '../common/SessionState';
 import { createThemePalette, type ThemePalette } from '../common/UiDesign';
 
+class LinkDataSource implements IDataSource {
+  private links: LinkItem[] = [];
+  private listeners: DataChangeListener[] = [];
+
+  totalCount(): number {
+    return this.links.length;
+  }
+
+  getData(index: number): LinkItem {
+    return this.links[index];
+  }
+
+  updateData(newLinks: LinkItem[]): void {
+    this.links = newLinks;
+    this.listeners.forEach((listener: DataChangeListener) => {
+      listener.onDataReloaded();
+    });
+  }
+
+  registerDataChangeListener(listener: DataChangeListener): void {
+    this.listeners.push(listener);
+  }
+
+  unregisterDataChangeListener(listener: DataChangeListener): void {
+    const index = this.listeners.indexOf(listener);
+    if (index >= 0) {
+      this.listeners.splice(index, 1);
+    }
+  }
+}
+
 export interface ElementsPanelCallbacks {
   onTabChange: (tab: string) => void;
   onRefreshLinks: () => void;
@@ -30,7 +61,8 @@ export interface ElementsPanelCallbacks {
 @Component
 export struct ElementsPanelComponent {
   @Prop currentTab: string = 'links';
-  @Prop links: Array<LinkItem> = [];
+  @Prop @Watch('onLinksChange') links: Array<LinkItem> = [];
+  private linkDataSource: LinkDataSource = new LinkDataSource();
   @Prop collections: Array<CollectionItem> = [];
   @Prop filteredCollections: Array<CollectionItem> = [];
   @Prop filteredTags: Array<string> = [];
@@ -59,6 +91,14 @@ export struct ElementsPanelComponent {
     const effectiveMode: ThemeMode =
       (this.themeMode === 'system' && this.deviceDarkMode) ? 'dark' : this.themeMode;
     return createThemePalette(effectiveMode);
+  }
+
+  aboutToAppear(): void {
+    this.linkDataSource.updateData(this.links);
+  }
+
+  private onLinksChange(): void {
+    this.linkDataSource.updateData(this.links);
   }
 
   build() {
@@ -236,12 +276,13 @@ export struct ElementsPanelComponent {
       }
 
       List({ space: 8 }) {
-        ForEach(this.links, (item: LinkItem) => {
+        LazyForEach(this.linkDataSource, (item: LinkItem) => {
           ListItem() {
             this.LinkCard(item);
           };
         }, (item: LinkItem) => `${item.id}-${item.url}`)
       }
+      .cachedCount(5)
       .divider({ strokeWidth: 0 })
       .width('100%')
       .height('100%')

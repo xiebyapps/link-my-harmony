@@ -50,8 +50,12 @@ export struct DashboardPanelComponent {
     return `${n}`;
   }
 
-  private res(key: Resource): string {
-    return this.getUIContext().getHostContext()!.resourceManager.getStringSync(key);
+  private res(name: string): string {
+    try {
+      return this.getUIContext().getHostContext()!.resourceManager.getStringByNameSync(name);
+    } catch (_) {
+      return name;
+    }
   }
 
   build() {
@@ -82,7 +86,7 @@ export struct DashboardPanelComponent {
 
       // Pinned links strip
       this.LinkStripSection(
-        '📌 ' + this.res($r('app.string.title_pinned_links')),
+        '📌 ' + this.res('title_pinned_links'),
         this.pinnedLinks.slice(0, 10),
         $r('app.string.msg_no_pinned_links'),
         () => { this.callbacks.onNavigatePinnedLinks(); }
@@ -90,7 +94,7 @@ export struct DashboardPanelComponent {
 
       // Recent links strip
       this.LinkStripSection(
-        '🕘 ' + this.res($r('app.string.title_recent_links')),
+        '🕘 ' + this.res('title_recent_links'),
         this.dashboardLinks.slice(0, 10),
         this.dashboardLoading && this.dashboardLinks.length === 0 ? $r('app.string.msg_loading_dashboard') : $r('app.string.msg_no_recent_links'),
         () => { this.callbacks.onNavigateRecentLinks(); }
