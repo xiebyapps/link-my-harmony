@@ -6,7 +6,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 NODE="/Applications/DevEco-Studio.app/Contents/tools/node/bin/node"
 HVIGOR="/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw.js"
-HDC="$HOME/Library/OpenHarmony/Sdk/12/toolchains/hdc"
+HDC="/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/toolchains/hdc"
 PKG="app.xiebaiyuan.linkmyharmony"
 HAP="$SCRIPT_DIR/entry/build/default/outputs/default/entry-default-signed.hap"
 
