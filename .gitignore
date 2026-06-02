@@ -61,3 +61,6 @@ service-account-file.json
 # Claude Code and CodeGraph
 .codegraph/
 .claude/
+.agents/
+.hivigor/
+docs/
