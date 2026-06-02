@@ -57,3 +57,7 @@ prisma/dev.db
 .turbo
 
 service-account-file.json
+
+# Claude Code and CodeGraph
+.codegraph/
+.claude/

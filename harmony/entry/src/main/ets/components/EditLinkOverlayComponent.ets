@@ -50,6 +50,10 @@ export struct EditLinkOverlayComponent {
     return createThemePalette(effectiveMode);
   }
 
+  private res(key: Resource): string {
+    return this.getUIContext().getHostContext()!.resourceManager.getStringSync(key);
+  }
+
   private matchedCollection(): CollectionItem | undefined {
     const q = this.editCollectionQuery.trim();
     if (q.length === 0) return undefined;
@@ -160,7 +164,7 @@ export struct EditLinkOverlayComponent {
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start);
 
-            Button(this.pinSaving ? '…' : (this.editPinned ? '📌 ' + $r('app.string.btn_pinned') : $r('app.string.btn_pin')))
+            Button(this.pinSaving ? '…' : (this.editPinned ? '📌 ' + this.res($r('app.string.btn_pinned')) : this.res($r('app.string.btn_pin'))))
               .fontSize(13)
               .height(34)
               .backgroundColor(this.editPinned ? this.palette().accentStrong : this.palette().surface)
