@@ -69,7 +69,7 @@ export struct DashboardPanelComponent {
         .width('100%');
 
         Row({ space: 8 }) {
-          this.ShortcutCard($r('app.string.title_tags'), 'number', this.formatCount(this.tagsTotal), () => {
+          this.ShortcutCard($r('app.string.title_tags'), 'tag', this.formatCount(this.tagsTotal), () => {
             this.callbacks.onNavigateTags();
           });
           this.ShortcutCard($r('app.string.btn_pinned'), 'pin', this.formatCount(this.pinnedTotal), () => {

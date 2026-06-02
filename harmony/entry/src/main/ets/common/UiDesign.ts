@@ -75,7 +75,7 @@ export interface ThemeOption {
 export interface QuickMenuAction {
   id: 'add' | 'search' | 'settings';
   symbolKey: string;
-  label: string;
+  label: Resource;
 }
 
 export function createDockActions(mainView: MainView): Array<DockAction> {
@@ -113,9 +113,9 @@ export function createDockActions(mainView: MainView): Array<DockAction> {
 
 export function createQuickMenuActions(): Array<QuickMenuAction> {
   return [
-    { id: 'add', symbolKey: 'plus_circle_fill', label: 'Add Link' },
-    { id: 'search', symbolKey: 'magnifyingglass', label: 'Search' },
-    { id: 'settings', symbolKey: 'gearshape', label: 'Settings' },
+    { id: 'add', symbolKey: 'plus_circle_fill', label: $r('app.string.quick_menu_add_link') },
+    { id: 'search', symbolKey: 'magnifyingglass', label: $r('app.string.quick_menu_search') },
+    { id: 'settings', symbolKey: 'gearshape', label: $r('app.string.quick_menu_settings') },
   ];
 }
 

@@ -96,7 +96,7 @@ export struct SettingsPanelComponent {
         // Info card
         Column({ space: 6 }) {
           Text(this.instance.length > 0 ? this.instance : 'Linkwarden')
-            .fontSize(13)
+            .fontSize(12)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.palette().textSecondary)
             .width('100%')
@@ -648,7 +648,7 @@ export struct SettingsPanelComponent {
     Button() {
       Column({ space: 4 }) {
         Text($r('app.string.' + title))
-          .fontSize(13)
+          .fontSize(12)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.isThemeOptionSelected(mode) ? this.palette().accentText : this.palette().textPrimary)
           .width('100%')

@@ -751,6 +751,18 @@
     {
       "name": "title_filter_all",
       "value": "All"
+    },
+    {
+      "name": "quick_menu_add_link",
+      "value": "Add Link"
+    },
+    {
+      "name": "quick_menu_search",
+      "value": "Search"
+    },
+    {
+      "name": "quick_menu_settings",
+      "value": "Settings"
     }
   ]
 }

@@ -150,8 +150,7 @@ export struct ElementsPanelComponent {
         Button() {
           SymbolGlyph($r('sys.symbol.plus'))
             .fontSize(20)
-            .fontColor([this.palette().accentText])
-            .width('100%');
+            .fontColor([this.palette().accentText]);
         }
         .width(40)
         .height(40)

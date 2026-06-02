@@ -62,12 +62,17 @@ export struct SearchPanelComponent {
             .borderRadius(12)
             .layoutWeight(1);
 
-          Button($r('app.string.btn_search'))
+          Button() {
+            SymbolGlyph($r('sys.symbol.magnifyingglass'))
+              .fontSize(18)
+              .fontColor([this.palette().accent]);
+          }
+            .width(44)
             .height(44)
             .backgroundColor(this.palette().accentSoft)
-            .fontColor(this.palette().accent)
             .borderRadius(12)
             .border({ width: 1, color: this.palette().accent })
+            .padding(0)
             .onClick(() => {
               this.callbacks.onSearch();
             });
